@@ -1,3 +1,4 @@
+import { Hero } from '@/components/hero/Hero';
 import { architectureScenarios } from '@/data/architecture-scenarios';
 import { engagements, expertise, profile } from '@/data/profile';
 import { technologies } from '@/data/technologies';
@@ -6,17 +7,7 @@ export default function HomePage() {
   return (
     <main id="main-content">
       <a className="skip-link" href="#expertise">Skip to content</a>
-
-      <section className="foundation-hero" aria-labelledby="hero-title">
-        <p className="kicker">Nabil Rakdani · Principal AI &amp; High-Performance Systems Architect</p>
-        <h1 id="hero-title">Intelligence,<br />engineered.</h1>
-        <p className="foundation-lede">{profile.description}</p>
-        <p className="technical-label">{profile.location} · {profile.availability} · {profile.years} years of experience</p>
-        <nav aria-label="Primary">
-          <a className="button" href="#contact">Discuss your infrastructure</a>
-          <a className="text-link" href="#architecture">Explore the architecture</a>
-        </nav>
-      </section>
+      <Hero />
 
       <section id="expertise" className="foundation-section light-section" aria-labelledby="expertise-title">
         <p className="technical-label">01 / EXPERTISE</p>
