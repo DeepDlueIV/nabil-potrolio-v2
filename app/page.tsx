@@ -1,5 +1,5 @@
+import { ArchitecturePlayground } from '@/components/architecture/ArchitecturePlayground';
 import { Hero } from '@/components/hero/Hero';
-import { architectureScenarios } from '@/data/architecture-scenarios';
 import { engagements, expertise, profile } from '@/data/profile';
 import { technologies } from '@/data/technologies';
 
@@ -23,20 +23,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="architecture" className="foundation-section" aria-labelledby="architecture-title">
-        <p className="technical-label">02 / ARCHITECTURE PLAYGROUND</p>
-        <h2 id="architecture-title">Systems you can inspect, not claims you have to trust.</h2>
-        <div className="foundation-grid">
-          {architectureScenarios.map((scenario) => (
-            <article key={scenario.id}>
-              <p className="technical-label">{scenario.eyebrow}</p>
-              <h3>{scenario.label}</h3>
-              <p>{scenario.summary}</p>
-              <small>{scenario.disclaimer}</small>
-            </article>
-          ))}
-        </div>
-      </section>
+      <ArchitecturePlayground />
 
       <section id="experience" className="foundation-section light-section" aria-labelledby="experience-title">
         <p className="technical-label">03 / EXPERIENCE · 2019 — PRESENT</p>
