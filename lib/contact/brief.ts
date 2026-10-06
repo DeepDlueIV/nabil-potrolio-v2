@@ -9,6 +9,22 @@ export type ProjectBriefInput = {
 
 const serviceLabels = new Map(engagements.map((engagement) => [engagement.id, engagement.title]));
 
+export function getContactAvailabilityCopy(email: string) {
+  if (email.trim()) {
+    return {
+      mode: 'email' as const,
+      callout: 'A verified email is configured. The form prepares an email draft for review; nothing is sent automatically.',
+      dialog: 'This prepares an email draft for you to review and send. Nothing is transmitted automatically.',
+    };
+  }
+
+  return {
+    mode: 'copy' as const,
+    callout: 'No verified public email is configured. The brief is copied locally and nothing is sent.',
+    dialog: 'This prepares a portable brief. Until a verified recipient is configured, nothing leaves your browser.',
+  };
+}
+
 export function buildProjectBrief(input: ProjectBriefInput) {
   const service = serviceLabels.get(input.service) ?? 'Not selected';
 

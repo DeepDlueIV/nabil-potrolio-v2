@@ -2,7 +2,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { ContactDialog } from '@/components/contact/ContactDialog';
-import { buildMailtoHref, buildProjectBrief } from '@/lib/contact/brief';
+import { buildMailtoHref, buildProjectBrief, getContactAvailabilityCopy } from '@/lib/contact/brief';
 
 const validBrief = {
   name: 'Ada Lovelace',
@@ -25,6 +25,13 @@ describe('project brief', () => {
     expect(href).toMatch(/^mailto:verified@example\.com\?/);
     expect(decodeURIComponent(href)).toContain('Project brief from Ada Lovelace');
     expect(decodeURIComponent(href)).toContain(validBrief.summary);
+  });
+
+  it('keeps contact availability copy consistent with configuration', () => {
+    expect(getContactAvailabilityCopy('')).toMatchObject({ mode: 'copy' });
+    expect(getContactAvailabilityCopy('').callout).toMatch(/No verified public email/i);
+    expect(getContactAvailabilityCopy('verified@example.com')).toMatchObject({ mode: 'email' });
+    expect(getContactAvailabilityCopy('verified@example.com').callout).toMatch(/verified email/i);
   });
 });
 
@@ -58,5 +65,23 @@ describe('contact dialog', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('Brief copied. Nothing was sent.');
     expect(writeText).toHaveBeenCalledWith(expect.stringContaining(validBrief.summary));
+  });
+
+  it('traps keyboard focus inside the modal and restores it after Escape', async () => {
+    const user = userEvent.setup();
+    render(<ContactDialog triggerLabel="Start a project brief" />);
+    const trigger = screen.getByRole('button', { name: 'Start a project brief' });
+
+    await user.click(trigger);
+    const close = screen.getByRole('button', { name: 'Close contact form' });
+    close.focus();
+    await user.tab({ shift: true });
+    expect(screen.getByRole('button', { name: /prepare brief/i })).toHaveFocus();
+    await user.tab();
+    expect(close).toHaveFocus();
+
+    await user.keyboard('{Escape}');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
   });
 });

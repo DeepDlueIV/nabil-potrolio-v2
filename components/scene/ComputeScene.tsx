@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ComputePoster } from './ComputePoster';
 import type { SceneComponentId, SceneMode, ScenePhase } from './compute-model';
 
@@ -28,6 +28,7 @@ export function ComputeScene(props: ComputeSceneProps) {
   const [webgl, setWebgl] = useState(false);
   const [visible, setVisible] = useState(true);
   const container = useRef<HTMLDivElement>(null);
+  const handleContextLost = useCallback(() => setWebgl(false), []);
 
   useEffect(() => {
     if (props.forceFallback) return;
@@ -44,9 +45,15 @@ export function ComputeScene(props: ComputeSceneProps) {
   }, []);
 
   return (
-    <div ref={container} className="compute-scene" data-webgl={webgl ? 'active' : 'fallback'}>
+    <div
+      ref={container}
+      className="compute-scene"
+      data-webgl={webgl ? 'active' : 'fallback'}
+      data-paused={props.paused}
+      data-testid="compute-scene"
+    >
       <ComputePoster mode={props.mode} selected={props.selected} phase={props.phase} />
-      {webgl && <ComputeCanvas mode={props.mode} selected={props.selected} phase={props.phase} paused={props.paused} visible={visible} />}
+      {webgl && <ComputeCanvas mode={props.mode} selected={props.selected} phase={props.phase} paused={props.paused} visible={visible} onContextLost={handleContextLost} />}
     </div>
   );
 }

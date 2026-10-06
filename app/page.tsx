@@ -8,6 +8,7 @@ import { TechnologyExplorer } from '@/components/technology/TechnologyExplorer';
 import { MotionProvider } from '@/components/ui/MotionProvider';
 import { SiteHeader } from '@/components/ui/SiteHeader';
 import { profile } from '@/data/profile';
+import { getContactAvailabilityCopy } from '@/lib/contact/brief';
 
 export default function HomePage() {
   return (
@@ -32,7 +33,7 @@ export default function HomePage() {
             <p className="technical-label">Project brief</p>
             <p>A structured local-first form helps turn the first message into useful technical context.</p>
             <ContactDialog triggerLabel="Prepare a project brief" />
-            <small>No verified public email is configured. The brief is copied locally and nothing is sent.</small>
+            <small>{getContactAvailabilityCopy(profile.contacts.email).callout}</small>
           </div>
         </section>
       </main>

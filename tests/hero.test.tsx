@@ -33,6 +33,19 @@ describe('Hero', () => {
     expect(screen.getByTestId('compute-poster')).toHaveAttribute('data-selected', 'data');
   });
 
+  it('moves narrative tab selection and focus with the arrow keys', async () => {
+    const user = userEvent.setup();
+    render(<Hero forceFallback />);
+    const compute = screen.getByRole('tab', { name: /compute/i });
+
+    compute.focus();
+    await user.keyboard('{ArrowRight}');
+
+    const orchestration = screen.getByRole('tab', { name: /orchestration/i });
+    expect(orchestration).toHaveFocus();
+    expect(orchestration).toHaveAttribute('aria-selected', 'true');
+  });
+
   it('offers an explicit motion pause and a complete fallback illustration', async () => {
     const user = userEvent.setup();
     render(<Hero forceFallback />);

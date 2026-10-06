@@ -76,6 +76,23 @@ export function TechnologyExplorer() {
           </div>
         </aside>
       </div>
+
+      <details className="complete-record complete-record--technology" role="group" aria-label="Complete technology inventory">
+        <summary>Complete technology inventory</summary>
+        <div className="complete-record__grid">
+          {technologies.map((group) => (
+            <section key={group.id}>
+              <p className="technical-label">{group.label}</p>
+              <p>{group.description}</p>
+              <ul>
+                {group.items.map((technology) => (
+                  <li key={technology.name}><strong>{technology.name}</strong> — {technology.purpose}</li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      </details>
     </section>
   );
 }

@@ -1,14 +1,17 @@
 'use client';
 
-import { Canvas, useFrame } from '@react-three/fiber';
-import { useRef } from 'react';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import type { ComputeSceneProps } from './ComputeScene';
 import type { SceneComponentId } from './compute-model';
 
-type ComputeCanvasProps = Omit<ComputeSceneProps, 'forceFallback'> & { visible: boolean };
+type ComputeCanvasProps = Omit<ComputeSceneProps, 'forceFallback'> & {
+  visible: boolean;
+  onContextLost: () => void;
+};
 
-function ClusterModel({ mode, selected, phase, paused }: Omit<ComputeCanvasProps, 'visible'>) {
+function ClusterModel({ mode, selected, phase, paused }: Omit<ComputeCanvasProps, 'visible' | 'onContextLost'>) {
   const group = useRef<THREE.Group>(null);
   const pulse = useRef<THREE.Mesh>(null);
   const targetSpread = mode === 'exploded' ? 1.1 : 0;
@@ -72,7 +75,23 @@ function ClusterModel({ mode, selected, phase, paused }: Omit<ComputeCanvasProps
   );
 }
 
-export function ComputeCanvas({ visible, ...props }: ComputeCanvasProps) {
+function ContextLossHandler({ onContextLost }: { onContextLost: () => void }) {
+  const gl = useThree((state) => state.gl);
+
+  useEffect(() => {
+    const canvas = gl.domElement;
+    const handleContextLost = (event: Event) => {
+      event.preventDefault();
+      onContextLost();
+    };
+    canvas.addEventListener('webglcontextlost', handleContextLost);
+    return () => canvas.removeEventListener('webglcontextlost', handleContextLost);
+  }, [gl, onContextLost]);
+
+  return null;
+}
+
+export function ComputeCanvas({ visible, onContextLost, ...props }: ComputeCanvasProps) {
   return (
     <div className="compute-canvas" aria-hidden="true">
       <Canvas
@@ -85,6 +104,7 @@ export function ComputeCanvas({ visible, ...props }: ComputeCanvasProps) {
         <ambientLight intensity={.9} />
         <directionalLight position={[5, 7, 6]} intensity={3.2} color="#d9f8ff" castShadow />
         <pointLight position={[-4, 1, 3]} intensity={5} color="#2da9ba" />
+        <ContextLossHandler onContextLost={onContextLost} />
         <ClusterModel {...props} />
       </Canvas>
     </div>

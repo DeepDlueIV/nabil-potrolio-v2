@@ -3,6 +3,7 @@
 import { useCallback, useState } from 'react';
 import { profile } from '@/data/profile';
 import { ComputeScene } from '../scene/ComputeScene';
+import { useMotionPreference } from '../ui/MotionProvider';
 import { sceneComponents, type SceneComponentId, type SceneMode, type ScenePhase } from '../scene/compute-model';
 import { HeroNarrative } from './HeroNarrative';
 
@@ -11,11 +12,14 @@ export function Hero({ forceFallback = false }: { forceFallback?: boolean }) {
   const [selected, setSelected] = useState<SceneComponentId>('accelerators');
   const [phase, setPhase] = useState<ScenePhase>('compute');
   const [paused, setPaused] = useState(false);
+  const { preference } = useMotionPreference();
+  const reduced = preference === 'reduced';
+  const motionPaused = paused || reduced;
   const selectPhase = useCallback((next: ScenePhase) => setPhase(next), []);
   const selectedComponent = sceneComponents.find((component) => component.id === selected) ?? sceneComponents[0];
 
   return (
-    <section className="hero" id="top" data-motion={paused ? 'paused' : 'full'} aria-labelledby="hero-title">
+    <section className="hero" id="top" data-motion={motionPaused ? 'paused' : 'full'} aria-labelledby="hero-title">
       <div className="hero-sticky">
         <div className="hero-grid">
           <div className="hero-copy">
@@ -31,15 +35,22 @@ export function Hero({ forceFallback = false }: { forceFallback?: boolean }) {
           </div>
 
           <div className="hero-system">
-            <ComputeScene mode={mode} selected={selected} phase={phase} paused={paused} forceFallback={forceFallback} />
+            <ComputeScene mode={mode} selected={selected} phase={phase} paused={motionPaused} forceFallback={forceFallback} />
             <div className="scene-toolbar">
               <div className="segmented" aria-label="Scene arrangement">
                 {(['assembled', 'exploded'] as SceneMode[]).map((item) => (
                   <button key={item} type="button" aria-pressed={mode === item} onClick={() => setMode(item)}>{item[0].toUpperCase() + item.slice(1)}</button>
                 ))}
               </div>
-              <button className="motion-pause" type="button" aria-pressed={paused} onClick={() => setPaused((value) => !value)}>
-                {paused ? 'Resume motion' : 'Pause motion'}
+              <button
+                className="motion-pause"
+                type="button"
+                aria-label={reduced ? 'Motion reduced globally' : undefined}
+                aria-pressed={motionPaused}
+                disabled={reduced}
+                onClick={() => setPaused((value) => !value)}
+              >
+                {reduced ? 'Motion reduced globally' : paused ? 'Resume motion' : 'Pause motion'}
               </button>
             </div>
             <p className="sr-only" role="status" aria-label="Scene mode">{mode === 'assembled' ? 'Assembled view active' : 'Exploded view active'}</p>
@@ -60,7 +71,7 @@ export function Hero({ forceFallback = false }: { forceFallback?: boolean }) {
             <p className="component-description" role="status" aria-label="Selected component">{selectedComponent.description}</p>
           </div>
         </div>
-        <HeroNarrative activePhase={phase} onPhaseChange={selectPhase} />
+        <HeroNarrative activePhase={phase} onPhaseChange={selectPhase} reduced={motionPaused} />
       </div>
     </section>
   );

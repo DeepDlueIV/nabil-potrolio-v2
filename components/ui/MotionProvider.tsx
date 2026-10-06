@@ -9,7 +9,12 @@ type MotionContextValue = {
   setPreference: (preference: MotionPreference) => void;
 };
 
-const MotionContext = createContext<MotionContextValue | null>(null);
+const defaultMotionContext: MotionContextValue = {
+  preference: 'full',
+  setPreference: () => undefined,
+};
+
+const MotionContext = createContext<MotionContextValue>(defaultMotionContext);
 
 export function MotionProvider({ children }: { children: ReactNode }) {
   const [preference, setPreference] = useState<MotionPreference>('full');
@@ -33,9 +38,7 @@ export function MotionProvider({ children }: { children: ReactNode }) {
 }
 
 export function useMotionPreference() {
-  const context = useContext(MotionContext);
-  if (!context) throw new Error('useMotionPreference must be used inside MotionProvider');
-  return context;
+  return useContext(MotionContext);
 }
 
 export function MotionControl() {

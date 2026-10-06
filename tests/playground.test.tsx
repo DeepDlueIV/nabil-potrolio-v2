@@ -56,6 +56,13 @@ describe('ArchitecturePlayground', () => {
 
     screen.getByRole('tab', { name: 'Private LLM / RAG' }).focus();
     await user.keyboard('{ArrowRight}');
-    expect(screen.getByRole('tab', { name: 'Streaming Data Platform' })).toHaveAttribute('aria-selected', 'true');
+    const streaming = screen.getByRole('tab', { name: 'Streaming Data Platform' });
+    expect(streaming).toHaveAttribute('aria-selected', 'true');
+    expect(streaming).toHaveFocus();
+
+    await user.keyboard('{ArrowRight}');
+    const secure = screen.getByRole('tab', { name: 'Secure Enterprise AI' });
+    expect(secure).toHaveAttribute('aria-selected', 'true');
+    expect(secure).toHaveFocus();
   });
 });

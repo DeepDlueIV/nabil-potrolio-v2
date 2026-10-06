@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { engagements, profile } from '@/data/profile';
-import { buildMailtoHref, buildProjectBrief, type ProjectBriefInput } from '@/lib/contact/brief';
+import { buildMailtoHref, buildProjectBrief, getContactAvailabilityCopy, type ProjectBriefInput } from '@/lib/contact/brief';
 
 type ContactDialogProps = {
   triggerLabel?: string;
@@ -26,12 +26,33 @@ export function ContactDialog({
   const [preparedHref, setPreparedHref] = useState('');
   const triggerRef = useRef<HTMLButtonElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLElement>(null);
+  const contactCopy = getContactAvailabilityCopy(profile.contacts.email);
 
   useEffect(() => {
     if (!open) return;
     nameRef.current?.focus();
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') closeDialog();
+      if (event.key === 'Escape') {
+        closeDialog();
+        return;
+      }
+      if (event.key !== 'Tab' || !dialogRef.current) return;
+
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href]',
+      ));
+      const first = focusable[0];
+      const last = focusable.at(-1);
+      if (!first || !last) return;
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
@@ -39,7 +60,7 @@ export function ContactDialog({
 
   function closeDialog() {
     setOpen(false);
-    requestAnimationFrame(() => triggerRef.current?.focus());
+    triggerRef.current?.focus();
   }
 
   function openDialog() {
@@ -91,7 +112,7 @@ export function ContactDialog({
         <div className="contact-modal" role="presentation" onMouseDown={(event) => {
           if (event.currentTarget === event.target) closeDialog();
         }}>
-          <section className="contact-dialog" role="dialog" aria-modal="true" aria-labelledby="contact-dialog-title">
+          <section ref={dialogRef} className="contact-dialog" role="dialog" aria-modal="true" aria-labelledby="contact-dialog-title">
             <div className="contact-dialog__header">
               <div>
                 <p className="technical-label">Project brief / local-first</p>
@@ -99,7 +120,7 @@ export function ContactDialog({
               </div>
               <button type="button" className="dialog-close" onClick={closeDialog} aria-label="Close contact form">×</button>
             </div>
-            <p className="contact-dialog__lede">This prepares a portable brief. Until a verified recipient is configured, nothing leaves your browser.</p>
+            <p className="contact-dialog__lede">{contactCopy.dialog}</p>
             <form onSubmit={handleSubmit} noValidate>
               <label>
                 <span>Your name</span>

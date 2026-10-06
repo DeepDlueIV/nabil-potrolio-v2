@@ -8,6 +8,7 @@ Install Node.js 22 or newer. In PowerShell:
 
 ```powershell
 npm ci
+npx playwright install chromium
 npm run dev
 ```
 
@@ -18,8 +19,11 @@ npm run typecheck
 npm run lint
 npm test
 npm run build
+npm run test:e2e
 npm run check
 ```
+
+`npm run test:e2e` exercises the production build. Run `npm run build` first, or use `npm run check` for the complete sequence.
 
 ## Edit the profile
 
@@ -35,6 +39,8 @@ contacts: {
 
 Use a plain email address and full `https://` social URLs. Experience, expertise, services, and languages live in `data/profile.ts`. Technologies and architecture illustrations have their own typed data modules in `data/`.
 
+The visible career span is intentionally fixed at **7 years / 2019 — Present**. The four role ranges are `2021 — Present`, `2021 — 2024`, `2020 — 2021`, and `2019 — 2020`; update the data tests with any future verified change.
+
 ## Structure
 
 - `app/` — App Router page, metadata, and global visual system.
@@ -42,9 +48,22 @@ Use a plain email address and full `https://` social URLs. Experience, expertise
 - `data/` — verified profile, technology, and architecture source data.
 - `lib/` — deterministic state and contact helpers.
 - `tests/` — Vitest behavior tests.
+- `tests/e2e/` — Playwright production-browser checks for responsive layout and the main interaction paths.
+- `ASSETS.md` — local image provenance and generated-asset disclosures.
+- `docs/QA.md` — verification matrix, viewport record, and known limitations.
 
 ## Contact behavior
 
 Until an email address is configured, the contact dialog prepares a project brief and copies it locally. Nothing is sent or stored. Once a verified email is configured, submitting opens a draft for the visitor to review and send.
 
 Professional claims come from the supplied profile legend. Generic employers remain generic; illustrative images and diagrams do not imply employment, client work, or endorsements.
+
+## Source archive
+
+After committing the intended source state, create a clean handoff archive from Git:
+
+```powershell
+git archive --format=zip --output=Nabil-Portfolio-V2-source.zip HEAD
+```
+
+Because it is generated from the committed tree, the archive excludes `.git`, `.next`, `node_modules`, Playwright output, local caches, ignored secrets, and the archive itself.

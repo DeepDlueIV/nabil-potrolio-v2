@@ -1,11 +1,12 @@
 'use client';
 
 import { motion } from 'motion/react';
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useRef } from 'react';
 import { architectureScenarios } from '@/data/architecture-scenarios';
 import type { ArchitectureScenario } from '@/data/types';
 import { createInitialPlaygroundState, getActiveRoute, getScenario, playgroundReducer } from '@/lib/architecture/playground-reducer';
 import { ArchitectureDiagram } from './ArchitectureDiagram';
+import { useMotionPreference } from '../ui/MotionProvider';
 
 function statusMessage(status: ReturnType<typeof createInitialPlaygroundState>['demoStatus'], scenario: ArchitectureScenario, unavailableWorkerId: string | null) {
   const worker = scenario.nodes.find((node) => node.id === unavailableWorkerId);
@@ -21,6 +22,9 @@ function statusMessage(status: ReturnType<typeof createInitialPlaygroundState>['
 
 export function ArchitecturePlayground() {
   const [state, dispatch] = useReducer(playgroundReducer, undefined, () => createInitialPlaygroundState());
+  const scenarioTabs = useRef<Array<HTMLButtonElement | null>>([]);
+  const { preference } = useMotionPreference();
+  const reduced = preference === 'reduced';
   const scenario = getScenario(state.scenarioId);
   const route = getActiveRoute(state);
   const selectedNode = scenario.nodes.find((node) => node.id === state.selectedNodeId) ?? scenario.nodes[0];
@@ -39,6 +43,7 @@ export function ArchitecturePlayground() {
     const offset = event.key === 'ArrowRight' ? 1 : -1;
     const next = architectureScenarios[(index + offset + architectureScenarios.length) % architectureScenarios.length];
     selectScenario(next.id);
+    scenarioTabs.current[(index + offset + architectureScenarios.length) % architectureScenarios.length]?.focus();
   };
 
   return (
@@ -53,6 +58,7 @@ export function ArchitecturePlayground() {
         {architectureScenarios.map((candidate, index) => (
           <button
             key={candidate.id}
+            ref={(node) => { scenarioTabs.current[index] = node; }}
             type="button"
             role="tab"
             aria-label={candidate.label}
@@ -66,7 +72,15 @@ export function ArchitecturePlayground() {
         ))}
       </div>
 
-      <motion.div className="architecture-workbench" key={scenario.id} initial={{ opacity: .65, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: .42 }}>
+      <motion.div
+        className="architecture-workbench"
+        data-testid="architecture-workbench"
+        data-motion={reduced ? 'reduced' : 'full'}
+        key={scenario.id}
+        initial={reduced ? false : { opacity: .65, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: reduced ? 0 : .42 }}
+      >
         <div className="architecture-sidebar">
           <p className="technical-label">{scenario.eyebrow}</p>
           <h3>{scenario.label}</h3>
