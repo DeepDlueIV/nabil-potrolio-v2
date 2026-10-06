@@ -1,0 +1,62 @@
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { describe, expect, it, vi } from 'vitest';
+import { ContactDialog } from '@/components/contact/ContactDialog';
+import { buildMailtoHref, buildProjectBrief } from '@/lib/contact/brief';
+
+const validBrief = {
+  name: 'Ada Lovelace',
+  email: 'ada@example.com',
+  service: 'architecture-audit',
+  summary: 'We need to understand where our inference path is saturating.',
+};
+
+describe('project brief', () => {
+  it('builds a portable, explicit text brief', () => {
+    expect(buildProjectBrief(validBrief)).toContain('Name: Ada Lovelace');
+    expect(buildProjectBrief(validBrief)).toContain('Reply email: ada@example.com');
+    expect(buildProjectBrief(validBrief)).toContain('Service: High-Load Architecture Audit & Cost Redesign');
+    expect(buildProjectBrief(validBrief)).toContain(validBrief.summary);
+  });
+
+  it('builds a configured email draft without claiming a send', () => {
+    const href = buildMailtoHref('verified@example.com', validBrief);
+
+    expect(href).toMatch(/^mailto:verified@example\.com\?/);
+    expect(decodeURIComponent(href)).toContain('Project brief from Ada Lovelace');
+    expect(decodeURIComponent(href)).toContain(validBrief.summary);
+  });
+});
+
+describe('contact dialog', () => {
+  it('shows validation errors before preparing a brief', async () => {
+    const user = userEvent.setup();
+    render(<ContactDialog triggerLabel="Start a project brief" />);
+
+    await user.click(screen.getByRole('button', { name: 'Start a project brief' }));
+    await user.click(screen.getByRole('button', { name: /prepare brief/i }));
+
+    expect(screen.getByText(/enter your name/i)).toBeInTheDocument();
+    expect(screen.getByText(/enter a valid reply email/i)).toBeInTheDocument();
+    expect(screen.getByText(/describe the system or decision/i)).toBeInTheDocument();
+  });
+
+  it('copies a brief locally when no verified recipient is configured', async () => {
+    const user = userEvent.setup();
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+    render(<ContactDialog triggerLabel="Start a project brief" />);
+
+    await user.click(screen.getByRole('button', { name: 'Start a project brief' }));
+    await user.type(screen.getByLabelText(/your name/i), validBrief.name);
+    await user.type(screen.getByLabelText(/reply email/i), validBrief.email);
+    await user.type(screen.getByLabelText(/task summary/i), validBrief.summary);
+    await user.click(screen.getByRole('button', { name: /prepare brief/i }));
+
+    expect(screen.getByRole('status')).toHaveTextContent('Brief copied. Nothing was sent.');
+    expect(writeText).toHaveBeenCalledWith(expect.stringContaining(validBrief.summary));
+  });
+});

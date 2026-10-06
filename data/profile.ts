@@ -28,25 +28,25 @@ export const profile: {
       id: 'principal', dates: '2021 — Present', title: 'Independent Principal Architect & Fractional CTO', organization: 'Independent Contractor / Consultant', domain: 'Private AI platforms & technical leadership',
       description: 'Architectural direction and AI infrastructure consulting for high-tech enterprises and growth-stage companies.',
       responsibilities: ['Design greenfield private AI platforms', 'Shape distributed compute clusters', 'Guide high-throughput service architecture'],
-      technologies: ['Kubernetes', 'CUDA', 'vLLM', 'Terraform'], image: '/images/experience-datacenter.jpg', imageAlt: 'Editorial illustration of server infrastructure; not a client site', imagePosition: '50% 48%',
+      technologies: ['Kubernetes', 'CUDA', 'vLLM', 'Terraform'], image: '/images/experience-datacenter.webp', imageAlt: 'AI-generated editorial photograph of server infrastructure; not a client site', imagePosition: '50% 48%',
     },
     {
       id: 'lead', dates: '2021 — 2024', title: 'Lead Solutions Architect — AI & High-Performance Cloud', organization: 'Enterprise Advisory Services', domain: 'Cloud, data & security strategy',
       description: 'Directed cloud and data infrastructure strategy for European enterprise clients across AWS and bare-metal environments.',
       responsibilities: ['Lead security and architecture audits', 'Integrate production MLOps systems', 'Redesign infrastructure cost profiles'],
-      technologies: ['AWS', 'Bare-Metal', 'MLOps', 'Vault'], image: '/images/experience-network.jpg', imageAlt: 'Editorial illustration of network infrastructure; not an employer facility', imagePosition: '52% 44%',
+      technologies: ['AWS', 'Bare-Metal', 'MLOps', 'Vault'], image: '/images/experience-network.webp', imageAlt: 'AI-generated editorial photograph of network infrastructure; not an employer facility', imagePosition: '52% 44%',
     },
     {
       id: 'senior', dates: '2020 — 2021', title: 'Senior Infrastructure & DevOps Engineer', organization: 'European Tech Infrastructure Provider', domain: 'Reliability, scale & delivery',
       description: 'Managed stability and scaling for infrastructure handling heavy real-time data flows.',
       responsibilities: ['Automate CI/CD pipelines', 'Containerize legacy systems', 'Establish DevSecOps practices'],
-      technologies: ['Docker', 'Kubernetes', 'Kafka', 'Prometheus'], image: '/images/experience-systems.jpg', imageAlt: 'Editorial illustration of computing equipment; not a client project', imagePosition: '50% 50%',
+      technologies: ['Docker', 'Kubernetes', 'Kafka', 'Prometheus'], image: '/images/experience-systems.webp', imageAlt: 'AI-generated editorial photograph of computing equipment; not a client project', imagePosition: '50% 50%',
     },
     {
       id: 'systems', dates: '2019 — 2020', title: 'Full-Stack Systems Engineer', organization: 'HPC & Low-Latency Systems', domain: 'Performance from first principles',
       description: 'Developed execution modules, low-latency data connectors, and high-performance system components.',
       responsibilities: ['Build execution modules', 'Develop low-latency data connectors', 'Engineer performance-critical components'],
-      technologies: ['C++', 'Go', 'Redis', 'PostgreSQL'], image: '/images/experience-hardware.jpg', imageAlt: 'Editorial illustration of electronic hardware; not an employer product', imagePosition: '50% 55%',
+      technologies: ['C++', 'Go', 'Redis', 'PostgreSQL'], image: '/images/experience-hardware.webp', imageAlt: 'AI-generated editorial photograph of electronic hardware; not an employer product', imagePosition: '50% 55%',
     },
   ]
 };

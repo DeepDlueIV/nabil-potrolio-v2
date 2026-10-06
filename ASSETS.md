@@ -1,21 +1,20 @@
 # Asset provenance
 
-## Original artwork
+All visual assets shipped with this repository are local. The site does not load third-party images at runtime.
 
-`src/illustration.mjs`, the server-rack fallback in `src/render.mjs` / `assets/style.css`, `assets/favicon.svg`, and `assets/social-preview.svg` were created for this site. The compute assembly and architecture scenarios are illustrative, not representations of a client installation or live telemetry.
+## Experience imagery
 
-## Illustrative photography
+The four experience images were generated for this portfolio with OpenAI ImageGen on 2026-10-06, then resized to 1600 px wide and encoded as WebP at quality 82. They are editorial atmosphere only: they do not depict Nabil Rakdani's clients, employers, products, or facilities.
 
-The site references these Unsplash CDN images from `data/profile.mjs`:
+| File | Use | Prompt summary |
+| --- | --- | --- |
+| `public/images/experience-datacenter.webp` | Principal architect | Photorealistic GPU server-room aisle, near-black steel, restrained cyan practical light, no people, brands, text, or client identity. |
+| `public/images/experience-network.webp` | Lead solutions architect | Photorealistic ordered network patch panels and cabling, graphite and muted blue, no people, brands, text, or client identity. |
+| `public/images/experience-systems.webp` | Senior infrastructure engineer | Photorealistic open high-performance compute racks in an industrial machine room, no people, brands, text, or client identity. |
+| `public/images/experience-hardware.webp` | Full-stack systems engineer | Photorealistic macro motherboard and processor socket, charcoal PCB and subtle cyan light, no brands, text, or employer identity. |
 
-- https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=85
-- https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=1200&q=85
-- https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=85
+## Code-native assets
 
-Unsplash license: https://unsplash.com/license
-
-The photographs are illustrative and must not be interpreted as Nabil Rakdani's employers, projects or workplaces.
-
-## Typography
-
-The page requests DM Sans and IBM Plex Mono from Google Fonts. Arial and Courier New are the offline fallbacks. No font binaries are bundled.
+- `app/icon.svg`: original geometric monogram created for this site.
+- `public/social-preview.svg`: original code-native social preview assembled from the site's typography and system diagram language.
+- Architecture and compute diagrams are rendered locally with HTML, SVG, CSS, and Three.js; they are illustrative and contain no client data.
