@@ -1,55 +1,50 @@
-# Nabil Rakdani — Intelligence, engineered.
+# Nabil Rakdani — Portfolio V2
 
-A bespoke one-page portfolio: graphite, chalk and copper; an original exploded compute illustration; editorial experience; and interactive architecture/technology explorers.
+A Next.js portfolio for a Principal AI & High-Performance Systems Architect and Fractional CTO. The Computational Atelier direction combines an authored compute scene, deterministic architecture illustrations, editorial experience, technology context, and an honest project brief.
 
 ## Run locally
 
-Install Node.js 22 or newer, then:
+Install Node.js 22 or newer. In PowerShell:
 
-```sh
-git clone https://github.com/DeepDlueIV/Nabil.git
-cd Nabil
+```powershell
+npm ci
 npm run dev
 ```
 
-Open http://localhost:3000. **No `npm install` is necessary.** There are no package dependencies.
+Open http://localhost:3000.
 
-```sh
-npm test       # Node built-in tests
-npm run build  # Prerender index.html and dist/
-npm run check  # Test, then build
+```powershell
+npm run typecheck
+npm run lint
+npm test
+npm run build
+npm run check
 ```
-
-The generated `dist/index.html` can also be opened directly in a browser. Upload the contents of `dist/` to any static host.
 
 ## Edit the profile
 
-Edit `data/profile.mjs` and rebuild. Contact values intentionally start empty:
+Edit `data/profile.ts`. Contact values intentionally start empty:
 
-```js
+```ts
 contacts: {
   email: '',
   github: '',
-  linkedin: ''
+  linkedin: '',
 }
 ```
 
-Use a plain email address and full `https://` social URLs. Experience, imagery, expertise, services, languages and stack labels live in the same data file.
+Use a plain email address and full `https://` social URLs. Experience, expertise, services, and languages live in `data/profile.ts`. Technologies and architecture illustrations have their own typed data modules in `data/`.
 
 ## Structure
 
-- `data/profile.mjs` — editable profile, architecture scenarios and technology data.
-- `src/render.mjs` — semantic prerendered HTML, escaped content and safe contact URLs.
-- `src/illustration.mjs` — original SVG compute assembly and icons.
-- `assets/style.css` — responsive layout, motion and reduced-motion/print styles.
-- `assets/app.js` — progressive enhancements, explorers and contact dialog.
-- `scripts/` — dependency-free Node build and static preview server.
-- `tests/` — unit tests.
-
-The site is deliberately dependency-free: the design, SVG visualizations, rendering and interactions are all implemented in the repository without a frontend framework runtime.
+- `app/` — App Router page, metadata, and global visual system.
+- `components/` — focused interactive client islands and server-rendered chapters.
+- `data/` — verified profile, technology, and architecture source data.
+- `lib/` — deterministic state and contact helpers.
+- `tests/` — Vitest behavior tests.
 
 ## Contact behavior
 
-Until an email address is configured, the contact dialog prepares a project brief and copies it locally. Nothing is sent or stored. Once an email is configured, submitting opens an email draft for the visitor to review and send.
+Until an email address is configured, the contact dialog prepares a project brief and copies it locally. Nothing is sent or stored. Once a verified email is configured, submitting opens a draft for the visitor to review and send.
 
-Professional claims come from the supplied profile legend. Generic employers remain generic; illustrative images and diagrams do not imply employment, client work or endorsements.
+Professional claims come from the supplied profile legend. Generic employers remain generic; illustrative images and diagrams do not imply employment, client work, or endorsements.
