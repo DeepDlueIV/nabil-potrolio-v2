@@ -53,6 +53,11 @@ export function ComputeScene(props: ComputeSceneProps) {
         </SceneBoundary>
       )}
       <div className="rack-callouts" aria-hidden="true">
+        <svg className="rack-leaders" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <path d="M9 24 L26 31" /><circle cx="26" cy="31" r=".3" />
+          <path d={inside ? 'M94 42 L37 63' : 'M94 42 L47 52'} /><circle cx={inside ? 37 : 47} cy={inside ? 63 : 52} r=".3" />
+          <path d="M12 80 L44 72" /><circle cx="44" cy="72" r=".3" />
+        </svg>
         <span className="rack-label rack-label-network">Network entry</span>
         <span className={`rack-label rack-label-compute ${inside ? 'is-open' : ''}`}>{inside ? '8 accelerators · shared interconnect' : 'GPU compute tray'}</span>
         <span className="rack-label rack-label-data">Context &amp; storage</span>
