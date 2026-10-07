@@ -8,6 +8,7 @@ export const profile: {
   location: string;
   availability: string;
   years: number;
+  portrait: { src: string; alt: string; objectPosition: string } | null;
   description: string;
   contacts: { email: string; github: string; linkedin: string };
   languages: string[];
@@ -19,6 +20,7 @@ export const profile: {
   location: 'Pavia, Italy',
   availability: 'Global B2B engagements',
   years: 7,
+  portrait: { src: '/images/nabil-portrait.webp', alt: 'Nabil Rakdani beside a GPU rig', objectPosition: '50% 38%' },
   description: 'Designing, scaling, and securing enterprise-grade AI infrastructure, distributed GPU clusters, and high-throughput systems.',
   // Keep empty until genuine contact details are supplied. Never link to fabricated profiles.
   contacts: { email: '', github: '', linkedin: '' },

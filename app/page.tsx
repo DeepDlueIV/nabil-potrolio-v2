@@ -9,14 +9,19 @@ import { MotionProvider } from '@/components/ui/MotionProvider';
 import { SiteHeader } from '@/components/ui/SiteHeader';
 import { profile } from '@/data/profile';
 import { getContactAvailabilityCopy } from '@/lib/contact/brief';
+import { About } from '@/components/about/About';
+import { ContactLinks } from '@/components/contact/ContactLinks';
+import { PresentationProvider } from '@/components/presentation/PresentationProvider';
 
 export default function HomePage() {
   return (
     <MotionProvider>
+      <PresentationProvider>
       <a className="skip-link" href="#expertise">Skip to content</a>
       <SiteHeader />
       <main id="main-content">
         <Hero />
+        <About />
         <Expertise />
         <ArchitecturePlayground />
         <Experience />
@@ -33,6 +38,7 @@ export default function HomePage() {
             <p className="technical-label">Project brief</p>
             <p>A structured local-first form helps turn the first message into useful technical context.</p>
             <ContactDialog triggerLabel="Prepare a project brief" />
+            <ContactLinks contacts={profile.contacts} />
             <small>{getContactAvailabilityCopy(profile.contacts.email).callout}</small>
           </div>
         </section>
@@ -42,6 +48,7 @@ export default function HomePage() {
         <p>{profile.location} · {profile.availability}</p>
         <p className="technical-label">Independent portfolio / 2026</p>
       </footer>
+      </PresentationProvider>
     </MotionProvider>
   );
 }
