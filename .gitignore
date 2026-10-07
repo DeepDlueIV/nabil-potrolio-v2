@@ -13,3 +13,5 @@ index.html
 *.zip
 *.tsbuildinfo
 __pycache__/
+.vercel
+.env*
