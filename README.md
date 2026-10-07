@@ -29,6 +29,8 @@ Production-browser tests use port **3100**, isolated from a local development se
 
 ## Automatic presentation
 
+Памятка об остановке анимаций из-за системного reduced-motion: [диагностика и проверка](docs/ANIMATION-TROUBLESHOOTING.md).
+
 Native scrolling is never intercepted. Hero, architecture, experience and tools share viewport-aware timer ownership. Manual selection and keyboard focus hold a presentation until Continue presentation; hover temporarily pauses photos and tools. Hidden tabs and offscreen scenes do not catch up missed steps. Presentations play by default independently of OS animation effects. The header Motion control pauses all motion and smooth anchor scrolling; the visitor's explicit choice is saved locally across visits.
 
 About follows the hero; all four career records and all six technology groups stay open. Photographs commit only after decoding the actual responsive candidate. A resize prepares the appropriate candidate while retaining the current image and caption. Failed loads use a bounded textual fallback.
