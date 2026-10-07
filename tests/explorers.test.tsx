@@ -10,7 +10,7 @@ import { ContactLinks, SourceGitHubLink } from '@/components/contact/ContactLink
 describe('open professional content', () => {
   it('links to GitHub home without inventing a personal GitHub contact', () => {
     render(<><SourceGitHubLink /><ContactLinks contacts={{ email: '', github: '', linkedin: '' }} /></>);
-    const source = screen.getByRole('link', { name: 'GitHub', exact: true });
+    const source = screen.getByRole('link', { name: 'GitHub' });
     expect(source).toHaveAttribute('href', 'https://github.com/');
     expect(source.querySelector('svg')).not.toBeNull();
     expect(screen.queryByRole('link', { name: 'GitHub profile' })).toBeNull();
