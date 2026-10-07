@@ -33,9 +33,9 @@ Files: components/presentation/PresentationProvider.tsx, usePresentation.ts, lib
 
 Interface: usePresentation({id, durations, ready?, pauseOnHover?}) returns {ref, step, source, held, running, progressKey, select(index), resume(), interactionProps}. Source is auto/manual; step is a zero-based flattened sequence index. Timers advance one complete step only. Readiness defaults true. Most-visible coordinator gates all sequences. useMotionPreference returns system preference only.
 
-- [ ] Write failing fake-timer tests for automatic progression, manual hold/resume, readiness, hidden page and visibility arbitration.
-- [ ] Implement the coordinator and hook using IntersectionObserver, one current-step timeout, and document visibility.
-- [ ] Run targeted tests, typecheck; commit the coherent presentation unit.
+- [x] Write failing fake-timer tests for automatic progression, manual hold/resume, readiness, hidden page and visibility arbitration.
+- [x] Implement the coordinator and hook using IntersectionObserver, one current-step timeout, and document visibility.
+- [x] Run targeted tests, typecheck; commit the coherent presentation unit.
 
 ## Task 2: Server hero
 
@@ -43,9 +43,9 @@ Files: components/hero/*, components/scene/*, tests/hero.test.tsx, dedicated her
 
 Consumes Task 1 hook. Sequence durations [4000,6000,6000,4000] with return mapped to System. Manual tabs select System/Inside/Data flow and hold. Build original rack geometry from NVIDIA form references, no external assets or logos. Use calm three-quarter camera, metal chassis, rails, vents, handles, accelerator tray, cables and request/response path. Demand rendering must invalidate on props. Pointer parallax only on fine pointer, visible, unreduced. Native hero height, meaningful SVG fallback.
 
-- [ ] Replace old-control tests with first-frame identity, recognizable fallback, automatic phase and manual hold tests; observe failures.
-- [ ] Implement scene and composed hero; record sources in documentation.
-- [ ] Verify tests and types; commit only hero files.
+- [x] Replace old-control tests with first-frame identity, recognizable fallback, automatic phase and manual hold tests; observe failures.
+- [x] Implement scene and composed hero; record sources in documentation.
+- [x] Verify tests and types; commit only hero files.
 
 ## Task 3: Architecture presentation
 
@@ -53,9 +53,9 @@ Files: components/architecture/*, lib/architecture/*, data/architecture-scenario
 
 Consumes Task 1 hook. Flatten 3 scenarios × 5 steps × 3200ms: normal, key stage, burst, failure, restored. Manual scenario chooses normal step and holds. Keep permanent overview of each scenario, noninteractive nodes, correct route and queue/reroute semantics; remove control chain/inspector. One conditional Continue presentation link.
 
-- [ ] Write failing sequence, route, manual selection and restore tests.
-- [ ] Implement automatic healthy-first demonstration and concise diagram/copy.
-- [ ] Verify tests and types; commit only architecture files.
+- [x] Write failing sequence, route, manual selection and restore tests.
+- [x] Implement automatic healthy-first demonstration and concise diagram/copy.
+- [x] Verify tests and types; commit only architecture files.
 
 ## Task 4: Experience, stack and About
 
@@ -63,15 +63,15 @@ Files: components/experience/*, components/technology/*, components/about/*, dat
 
 Consumes Task 1 hook. Experience duration 8000ms after ready; hover temporary pause, manual/focus indefinite hold. Preload next responsive source only near section. Keep current pair until next decode, bounded 6s error fallback. Full chronology always open. Complete grouped stack is plain text with compact tool-purpose sequence. Static About uses supplied portrait, profile and languages. Conditional GitHub link depends only on data.
 
-- [ ] Write failing readiness, open chronology, complete stack, hold/resume and conditional-link tests.
-- [ ] Implement double-layer readiness carousel, static chronology, tool showcase, About.
-- [ ] Verify tests and types; commit scoped content.
+- [x] Write failing readiness, open chronology, complete stack, hold/resume and conditional-link tests.
+- [x] Implement double-layer readiness carousel, static chronology, tool showcase, About.
+- [x] Verify tests and types; commit scoped content.
 
 ## Task 5: Integration and delivery
 
 Files: app/page.tsx, app/globals.css, components/ui/*, tests/e2e/*, docs/QA.md, README.md, ASSETS.md.
 
-- [ ] Integrate provider, static About and nav; remove obsolete global controls and sticky hero rules.
-- [ ] Run npm ci, typecheck, lint, all unit tests, build and production e2e.
-- [ ] Capture before/after at 1440,1280,768,390,360; record hero, architecture and image transitions; test cold/throttled requests and image decode.
-- [ ] Fresh whole-branch review, fix important findings, commit, push feature branch to portfolio-v2 and verify remote SHA. No merge or production update.
+- [x] Integrate provider, static About and nav; remove obsolete global controls and sticky hero rules.
+- [x] Run npm ci, typecheck, lint, all unit tests, build and production e2e.
+- [x] Capture before/after at 1440,1280,768,390,360; record hero, architecture and image transitions; test cold/throttled requests and image decode.
+- [x] Fresh whole-branch review, fix important findings, commit, push feature branch to portfolio-v2 and verify remote SHA. No merge or production update.
