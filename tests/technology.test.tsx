@@ -8,6 +8,31 @@ describe('technology purpose presentation', () => {
   beforeEach(() => vi.useFakeTimers());
   afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); vi.restoreAllMocks(); });
 
+  it('lets visitors select a group using the capability cards above the tool', () => {
+    render(<TechnologyExplorer />);
+    const show = screen.getByRole('figure', { name: 'Technology purpose presentation' });
+    const card = within(show).getByText('Events & semantic context').closest('button');
+    expect(card).not.toBeNull();
+    fireEvent.click(card!);
+    expect(within(show).getByRole('heading', { name: 'Apache Kafka' })).toBeInTheDocument();
+    expect(card).toHaveAttribute('aria-pressed', 'true');
+    expect(within(show).getAllByRole('button', { name: /^Data & streaming/ })).toHaveLength(1);
+    expect(within(show).queryByText('Continue presentation')).toBeNull();
+  });
+
+  it('keeps playback paused when a mouse click first focuses the pause control', () => {
+    render(<TechnologyExplorer />);
+    const pause = screen.getByRole('button', { name: 'Pause technology presentation' });
+    fireEvent.focus(pause);
+    fireEvent.click(pause);
+    act(() => vi.advanceTimersByTime(5000));
+    const show = screen.getByRole('figure', { name: 'Technology purpose presentation' });
+    expect(within(show).getByRole('heading', { name: 'vLLM' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Resume technology presentation' }));
+    act(() => vi.advanceTimersByTime(4500));
+    expect(within(show).getByRole('heading', { name: 'CUDA' })).toBeInTheDocument();
+  });
+
   it('makes the complete six-group stack readable without interaction', () => {
     render(<TechnologyExplorer />);
     const stack = screen.getByRole('region', { name: 'Complete technology stack' });
@@ -44,10 +69,10 @@ describe('technology purpose presentation', () => {
     act(() => vi.advanceTimersByTime(20000));
     const show = screen.getByRole('figure', { name: 'Technology purpose presentation' });
     expect(within(show).getByRole('heading', { name: 'Vault' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Continue presentation' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Resume technology presentation' }));
     act(() => vi.advanceTimersByTime(4500));
     expect(within(show).getByRole('heading', { name: 'Prometheus' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Continue presentation' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Pause technology presentation' })).toBeInTheDocument();
   });
 
   it('pauses the readable presentation on hover and holds keyboard focus', () => {
@@ -62,7 +87,7 @@ describe('technology purpose presentation', () => {
     fireEvent.focus(screen.getByRole('button', { name: 'Compute' }));
     act(() => vi.advanceTimersByTime(10000));
     expect(within(show).getByRole('heading', { name: 'CUDA' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Continue presentation' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Resume technology presentation' })).toBeInTheDocument();
   });
 
   it('preserves the current step in a hidden tab and restarts its viewing time', () => {

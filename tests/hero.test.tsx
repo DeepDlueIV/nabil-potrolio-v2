@@ -41,8 +41,8 @@ describe('Hero presentation', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Inside' }));
     act(() => { vi.advanceTimersByTime(30000); });
     expect(screen.getByRole('tab', { name: 'Inside' })).toHaveAttribute('aria-selected', 'true');
-    fireEvent.click(screen.getByRole('button', { name: 'Continue presentation' }));
-    expect(screen.queryByRole('button', { name: 'Continue presentation' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Resume server presentation' }));
+    expect(screen.getByRole('button', { name: 'Pause server presentation' })).toBeInTheDocument();
     act(() => { vi.advanceTimersByTime(6000); });
     expect(screen.getByRole('tab', { name: 'Data flow' })).toHaveAttribute('aria-selected', 'true');
   });
@@ -52,7 +52,7 @@ describe('Hero presentation', () => {
     render(<Hero forceFallback />);
     const system = screen.getByRole('tab', { name: 'System' });
     await user.click(system);
-    expect(screen.getByRole('button', { name: 'Continue presentation' })).toBeVisible();
+    expect(screen.getByRole('button', { name: 'Resume server presentation' })).toBeVisible();
     await user.keyboard('{ArrowRight}');
     const inside = screen.getByRole('tab', { name: 'Inside' });
     expect(inside).toHaveFocus();

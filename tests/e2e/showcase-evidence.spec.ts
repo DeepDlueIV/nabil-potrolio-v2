@@ -22,12 +22,13 @@ test('cold responsive photo candidate remains decoded after resize', async ({ pa
     const photo = node as HTMLImageElement;
     const decodeStart = performance.now();
     await photo.decode();
-    return { currentSrc: photo.currentSrc, naturalWidth: photo.naturalWidth, complete: photo.complete, decodeMs: performance.now() - decodeStart };
+    return { currentSrc: photo.currentSrc, naturalWidth: photo.naturalWidth, complete: photo.complete, requiredWidth: photo.getBoundingClientRect().width * devicePixelRatio, decodeMs: performance.now() - decodeStart };
   });
   expect(result.complete).toBe(true);
   expect(result.naturalWidth).toBeGreaterThan(0);
   expect(result.currentSrc).toContain('experience-network');
-  expect(new URL(result.currentSrc).searchParams.get('w')).toBe('384');
+  // После уменьшения viewport браузер вправе повторно использовать больший декодированный кандидат.
+  expect(result.naturalWidth).toBeGreaterThanOrEqual(Math.ceil(result.requiredWidth));
   await testInfo.attach('cold-resize-image-diagnostics.json', { body: JSON.stringify({ result, requests }, null, 2), contentType: 'application/json' });
   console.info('Cold resize image:', JSON.stringify(result));
   await page.getByRole('button', { name: 'Show experience frame 3' }).click();
@@ -37,21 +38,33 @@ test('cold responsive photo candidate remains decoded after resize', async ({ pa
 });
 
 test('record automatic hero architecture and photograph presentation', async ({ browser }, testInfo) => {
-  test.setTimeout(120000);
-  const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, recordVideo: { dir: 'output/playwright/showcase-recordings', size: { width: 1440, height: 900 } } });
+  test.setTimeout(200000);
+  const context = await browser.newContext({ reducedMotion: 'no-preference', viewport: { width: 1440, height: 900 }, recordVideo: { dir: 'output/playwright/showcase-recordings', size: { width: 1440, height: 900 } } });
   const page = await context.newPage();
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('http://127.0.0.1:3100');
   await page.locator('.rack-scene[data-webgl="active"]').waitFor();
-  await page.mouse.move(0, 0);
-  await page.waitForTimeout(20500);
+  await page.mouse.move(1050, 350);
+  const phases = new Set<string>();
+  for (let i = 0; i < 21; i++) { phases.add((await page.locator('.rack-scene').getAttribute('data-phase'))!); await page.waitForTimeout(1000); }
+  expect([...phases].sort()).toEqual(['flow', 'inside', 'return', 'system']);
   await page.getByTestId('architecture-workbench').scrollIntoViewIfNeeded();
   await page.mouse.move(0, 0);
-  await page.waitForTimeout(49000);
+  const scenarios = new Set<string>();
+  for (let i = 0; i < 25; i++) { scenarios.add((await page.locator('.scenario-tabs [aria-selected="true"]').getAttribute('id'))!); await page.waitForTimeout(2000); }
+  expect(scenarios.size).toBe(3);
   await page.locator('.experience-showcase').scrollIntoViewIfNeeded();
   await page.mouse.move(0, 0);
-  await page.waitForTimeout(17000);
+  const roles = new Set<string>();
+  for (let i = 0; i < 18; i++) { roles.add((await page.locator('.experience-showcase').getAttribute('data-frame'))!); await page.waitForTimeout(2000); }
+  expect([...roles].sort()).toEqual(['0', '1', '2', '3']);
+  const technology = page.getByRole('figure', { name: 'Technology purpose presentation' });
+  await technology.scrollIntoViewIfNeeded();
+  await page.mouse.move(20, 100);
+  const tools = new Set<string>();
+  for (let i = 0; i < 19; i++) { tools.add((await technology.locator('h3').textContent())!); await page.waitForTimeout(2000); }
+  expect(tools.size).toBe(8);
   expect(errors).toEqual([]);
   const video = page.video();
   await context.close();

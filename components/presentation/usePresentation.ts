@@ -11,13 +11,15 @@ export function usePresentation({ id, durations, ready = true, readyStep, pauseO
   const [held, setHeld] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [source, setSource] = useState<'auto' | 'manual'>('auto');
-  const { activeId, pageVisible, register, coordinated } = usePresentationEnvironment();
+  const [progress, setProgress] = useState(0);
+  const { visibleIds, pageVisible, register, coordinated } = usePresentationEnvironment();
   const { preference } = useMotionPreference();
   const cleanup = useRef<(() => void) | null>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const generation = useRef(0);
+  const frame = useRef<number | null>(null);
   const duration = durations[step] ?? durations[0];
-  const active = !coordinated || activeId === id;
+  const active = !coordinated || visibleIds.has(id);
   const reduced = preference === 'reduced';
   const running = active && pageVisible && ready && (readyStep === undefined || readyStep === step) && !held && !hovered && !reduced;
 
@@ -25,6 +27,8 @@ export function usePresentation({ id, durations, ready = true, readyStep, pauseO
     generation.current += 1;
     if (timer.current !== null) clearTimeout(timer.current);
     timer.current = null;
+    if (frame.current !== null) cancelAnimationFrame(frame.current);
+    frame.current = null;
   }, []);
 
   const ref = useCallback((element: HTMLElement | null) => {
@@ -36,9 +40,17 @@ export function usePresentation({ id, durations, ready = true, readyStep, pauseO
     cancel();
     if (!running) return;
     const token = generation.current;
+    const started = performance.now();
+    const updateProgress = () => {
+      if (generation.current !== token) return;
+      setProgress(Math.min(1, (performance.now() - started) / duration));
+      frame.current = requestAnimationFrame(updateProgress);
+    };
+    frame.current = requestAnimationFrame(updateProgress);
     timer.current = setTimeout(() => {
       if (generation.current !== token) return;
       setSource('auto');
+      setProgress(0);
       setStep((current) => (current + 1) % durations.length);
     }, duration);
     return cancel;
@@ -52,13 +64,17 @@ export function usePresentation({ id, durations, ready = true, readyStep, pauseO
   const resume = useCallback(() => { cancel(); setHeld(false); setHovered(false); setSource('auto'); }, [cancel]);
 
   return {
-    ref, step, held, source, active, pageVisible, reduced, running, duration,
+    ref, step, held, source, active, pageVisible, reduced, running, duration, progress,
+    pause: hold,
     progressKey: `${step}-${running}-${source}`,
     select, resume,
     interactionProps: {
       onMouseEnter: () => { if (pauseOnHover) { cancel(); setHovered(true); } },
       onMouseLeave: () => { if (pauseOnHover) setHovered(false); },
-      onFocusCapture: hold,
+      onFocusCapture: (event: React.FocusEvent<HTMLElement>) => {
+        if (event.target.closest('[data-presentation-playback]')) return;
+        hold();
+      },
     },
   };
 }

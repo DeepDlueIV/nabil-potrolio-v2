@@ -22,7 +22,7 @@ export function ExperienceShowcase() {
   const imageCache = useRef(new Map<string, Promise<boolean>>());
   const decodedSources = useRef(new Map<string, string>());
   const container = useRef<HTMLDivElement | null>(null);
-  const { ref: registerRef, step, held, progressKey, duration, running, select, resume, interactionProps } = usePresentation({ id: 'experience', durations, readyStep, pauseOnHover: true });
+  const { ref: registerRef, step, held, progress, reduced, select, resume, interactionProps } = usePresentation({ id: 'experience', durations, readyStep, pauseOnHover: true });
   const prepare = useCallback((index: number) => {
     const candidateKey = `${viewport}:${index}`;
     const cached = imageCache.current.get(candidateKey);
@@ -107,15 +107,23 @@ export function ExperienceShowcase() {
     </div>
     <div className="experience-frame-copy">
       <p className="technical-label">0{frame.index + 1} / 04 · {role.dates}</p>
-      <h3>{role.title}</h3>
-      <p>{role.domain}</p>
+      {/* Скрытые варианты резервируют высоту по реальному переносу текста, включая мобильный экран. */}
+      <div className="experience-title-slot">
+        {profile.experience.map((candidate) => <span className="experience-title-measure" aria-hidden="true" key={candidate.id}>{candidate.title}</span>)}
+        <h3 key={frame.index}>{role.title}</h3>
+      </div>
+      <div className="experience-domain-slot">
+        {profile.experience.map((candidate) => <span aria-hidden="true" key={candidate.id}>{candidate.domain}</span>)}
+        <p>{role.domain}</p>
+      </div>
       <div className="experience-frame-navigation" aria-label="Experience frames">
         {profile.experience.map((candidate, index) => <button key={candidate.id} ref={(node) => { buttons.current[index] = node; }}
-          type="button" aria-label={`Show experience frame ${index + 1}`} aria-pressed={step === index}
+          type="button" aria-label={`Show experience frame ${index + 1}`} aria-pressed={frame.index === index}
           onClick={() => select(index)} onKeyDown={(event) => key(event, index)}>{String(index + 1).padStart(2, '0')}</button>)}
+        {!reduced ? <button className="experience-playback" data-presentation-playback type="button" aria-label={held ? 'Resume experience presentation' : 'Pause experience presentation'}
+          onClick={() => { if (held) resume(); else select(frame.index); }}><span aria-hidden="true">{held ? '▶' : 'Ⅱ'}</span></button> : null}
       </div>
-      <div className="presentation-progress" aria-hidden="true"><span key={progressKey} style={{ animationDuration: `${duration}ms`, animationPlayState: running ? 'running' : 'paused' }} /></div>
-      <div className="experience-continuation">{held ? <button className="presentation-continue" type="button" onClick={() => { buttons.current[step]?.focus({ preventScroll: true }); resume(); }}>Continue presentation <span aria-hidden="true">→</span></button> : null}</div>
+      <div className="presentation-progress" aria-hidden="true"><span style={{ animation: 'none', transform: `scaleX(${progress})` }} /></div>
     </div>
   </div>;
 }

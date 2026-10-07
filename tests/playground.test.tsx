@@ -32,7 +32,7 @@ describe('Architecture presentation', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Secure Enterprise AI' }));
     act(() => { vi.advanceTimersByTime(40000); });
     expect(diagram()).toHaveAttribute('data-route', 'enterprise-user>identity>policy>private-inference>response');
-    fireEvent.click(screen.getByRole('button', { name: 'Continue presentation' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Resume architecture presentation' }));
     advance(); advance(); advance();
     expect(diagram()).toHaveAttribute('data-status', 'queued');
     expect(diagram()).toHaveAttribute('data-route', 'enterprise-user>identity>policy');
@@ -43,8 +43,8 @@ describe('Architecture presentation', () => {
   it('keeps all summaries readable without node controls or automatic announcements', () => {
     render(<ArchitecturePlayground />);
     expect(screen.getByRole('heading', { name: 'Private LLM / RAG' })).toBeVisible();
-    expect(screen.getByRole('heading', { name: 'Streaming Data Platform' })).toBeVisible();
-    expect(screen.getByRole('heading', { name: 'Secure Enterprise AI' })).toBeVisible();
+    expect(screen.getByRole('tab', { name: 'Streaming Data Platform' })).toBeVisible();
+    expect(screen.getByRole('tab', { name: 'Secure Enterprise AI' })).toBeVisible();
     expect(screen.queryByRole('button', { name: /inspect/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Continue presentation' })).not.toBeInTheDocument();
@@ -68,14 +68,34 @@ describe('Architecture presentation', () => {
     expect(document.activeElement).toBe(initialFocus);
   });
 
-  it('returns keyboard focus to the selected scenario on continuation', () => {
+  it('keeps the playback control mounted and focused when resuming', () => {
     render(<ArchitecturePlayground />);
     fireEvent.click(screen.getByRole('tab', { name: 'Streaming Data Platform' }));
-    const resume = screen.getByRole('button', { name: 'Continue presentation' });
+    const resume = screen.getByRole('button', { name: 'Resume architecture presentation' });
     act(() => resume.focus());
     fireEvent.click(resume);
-    expect(screen.getByRole('tab', { name: 'Streaming Data Platform' })).toHaveFocus();
+    expect(resume).toHaveFocus();
     advance();
     expect(screen.getByText('Stream processing')).toBeVisible();
+  });
+
+  it('keeps healthy packets moving while manual selection holds only the scenario', () => {
+    render(<ArchitecturePlayground />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Streaming Data Platform' }));
+    expect(diagram()).toHaveAttribute('data-running', 'true');
+    act(() => { vi.advanceTimersByTime(40000); });
+    expect(screen.getByRole('tab', { name: 'Streaming Data Platform' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.queryByRole('button', { name: 'Continue presentation' })).not.toBeInTheDocument();
+  });
+
+  it('pauses with the playback button without focus turning the click into resume', () => {
+    render(<ArchitecturePlayground />);
+    const playback = screen.getByRole('button', { name: 'Pause architecture presentation' });
+    act(() => playback.focus());
+    expect(screen.getByTestId('architecture-workbench')).toHaveAttribute('data-running', 'true');
+    fireEvent.click(playback);
+    expect(screen.getByRole('button', { name: 'Resume architecture presentation' })).toBe(playback);
+    act(() => { vi.advanceTimersByTime(40000); });
+    expect(screen.getByText('Private request')).toBeVisible();
   });
 });

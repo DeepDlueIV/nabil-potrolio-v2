@@ -1,7 +1,6 @@
 'use client';
 
 import type { CSSProperties } from 'react';
-import { useRef } from 'react';
 import { technologies } from '@/data/technologies';
 import { usePresentation } from '@/components/presentation/usePresentation';
 import styles from './TechnologyExplorer.module.css';
@@ -27,11 +26,10 @@ const frames = [
 const durations = frames.map(() => 4500);
 
 export function TechnologyExplorer() {
-  const { ref: showcaseRef, step, running, source, interactionProps, progressKey, duration, select, held, resume } =
+  const { ref: showcaseRef, step, running, source, active, pageVisible, reduced, interactionProps, progress, select, held, resume } =
     usePresentation({ id: 'technology', durations, pauseOnHover: true });
   const frame = frames[step];
   const groupIndex = Math.floor(step / 2);
-  const controls = useRef<Array<HTMLButtonElement | null>>([]);
 
   return (
     <section id="technology" className="technology-section" aria-labelledby="technology-title">
@@ -42,33 +40,31 @@ export function TechnologyExplorer() {
       </div>
       <div className={styles.layout}>
         <figure ref={showcaseRef} className={styles.showcase} aria-label="Technology purpose presentation"
-          data-running={running} data-source={source} {...interactionProps}>
-          <p className={`technical-label ${styles.eyebrow}`}>Where the tools work</p>
-          <div className={styles.layers} aria-label="System capabilities">
+          data-running={running} data-source={source} data-flow={active && pageVisible && !reduced} {...interactionProps}>
+          <div className={styles.toolbar}>
+            <p className={`technical-label ${styles.eyebrow}`}>Where the tools work</p>
+            {!reduced && <button className={styles.playback} data-presentation-playback type="button" aria-label={held ? 'Resume technology presentation' : 'Pause technology presentation'} onClick={held ? resume : () => select(step)}>
+              <span aria-hidden="true">{held ? '▶' : 'Ⅱ'}</span>
+            </button>}
+          </div>
+          <nav className={styles.layers} aria-label="Technology presentation groups">
             {groups.map((group, index) => (
-              <div key={group.id} className={`${styles.layer} ${index === groupIndex ? styles.activeLayer : ''}`}>
+              <button key={group.id} type="button" aria-label={group.label} aria-pressed={index === groupIndex} onClick={() => select(index * 2)} className={`${styles.layer} ${index === groupIndex ? styles.activeLayer : ''}`}>
                 <span>{group.label}</span>
                 <strong>{index === groupIndex ? frame.action : group.context}</strong>
-              </div>
-            ))}
-          </div>
-          <figcaption className={styles.caption}>
-            <h3>{frame.tool}</h3>
-            <p>{frame.explanation}</p>
-          </figcaption>
-          <ol className={styles.path} aria-label={`${frame.tool} purpose path`}>
-            {frame.path.map((node) => <li key={node}>{node}</li>)}
-          </ol>
-          <div className={styles.progress} aria-hidden="true">
-            <span key={progressKey} style={{ '--step-duration': `${duration}ms` } as CSSProperties} />
-          </div>
-          <nav className={styles.navigation} aria-label="Technology presentation groups">
-            {groups.map((group, index) => (
-              <button key={group.id} ref={(node) => { controls.current[index] = node; }} type="button" aria-pressed={index === groupIndex} onClick={() => select(index * 2)}>{group.label}</button>
+              </button>
             ))}
           </nav>
-          <div className={styles.continuation}>
-            {held && <button type="button" onClick={() => { controls.current[groupIndex]?.focus({ preventScroll: true }); resume(); }}>Continue presentation <span aria-hidden="true">→</span></button>}
+          <figcaption key={frame.tool} className={styles.caption}>
+            <h3>{frame.tool}</h3>
+            <p className={styles.action}>{frame.action}</p>
+            <p>{frame.explanation}</p>
+          </figcaption>
+          <ol key={`path-${frame.tool}`} className={styles.path} aria-label={`${frame.tool} purpose path`}>
+            {frame.path.map((node, index) => <li key={node} style={{ '--node-index': index } as CSSProperties}><span className={styles.nodeIndicator} aria-hidden="true" />{node}</li>)}
+          </ol>
+          <div className={styles.progress} aria-hidden="true">
+            <span style={{ transform: `scaleX(${progress})` }} />
           </div>
           <p className={styles.note}>Illustrative tool roles within a system.</p>
         </figure>

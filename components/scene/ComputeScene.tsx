@@ -1,6 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
+import Image from 'next/image';
 import { Component, useCallback, useEffect, useState, type ReactNode } from 'react';
 import { ComputePoster } from './ComputePoster';
 import type { ScenePhase } from './compute-model';
@@ -13,6 +14,7 @@ export type ComputeSceneProps = {
   active: boolean;
   reduced: boolean;
   forceFallback?: boolean;
+  onSceneReady?: () => void;
 };
 
 class SceneBoundary extends Component<{ children: ReactNode; onFailure: () => void }, { failed: boolean }> {
@@ -34,19 +36,27 @@ function supportsWebGL() {
 export function ComputeScene(props: ComputeSceneProps) {
   const [webgl, setWebgl] = useState(false);
   const [ready, setReady] = useState(false);
-  const handleFailure = useCallback(() => { setWebgl(false); setReady(false); }, []);
-  const handleReady = useCallback(() => setReady(true), []);
+  const [checked, setChecked] = useState(false);
+  const onSceneReady = props.onSceneReady;
+  const handleFailure = useCallback(() => { setWebgl(false); setReady(false); setChecked(true); onSceneReady?.(); }, [onSceneReady]);
+  const handleReady = useCallback(() => { setReady(true); onSceneReady?.(); }, [onSceneReady]);
 
   useEffect(() => {
-    if (props.forceFallback) return;
-    const timer = window.setTimeout(() => setWebgl(supportsWebGL()), 0);
+    if (props.forceFallback) { onSceneReady?.(); return; }
+    const timer = window.setTimeout(() => {
+      const supported = supportsWebGL();
+      setWebgl(supported); setChecked(true);
+      if (!supported) onSceneReady?.();
+    }, 0);
     return () => window.clearTimeout(timer);
-  }, [props.forceFallback]);
+  }, [props.forceFallback, onSceneReady]);
 
   const inside = props.phase === 'inside' || props.phase === 'flow';
   return (
     <div className="rack-scene" data-webgl={webgl && ready ? 'active' : 'fallback'} data-phase={props.phase} data-running={props.running} data-active={props.active} data-reduced={props.reduced} data-testid="compute-scene">
-      <ComputePoster phase={props.phase} running={props.running} reduced={props.reduced} />
+      {checked && !webgl || props.forceFallback
+        ? <ComputePoster phase={props.phase} running={props.running} reduced={props.reduced} />
+        : !ready && <Image className="hardware-poster" data-testid="compute-poster" src="/images/compute-rack-poster.png" alt="GPU server in a compact rack, ready for the presentation" fill unoptimized />}
       {webgl && !props.forceFallback && (
         <SceneBoundary onFailure={handleFailure}>
           <ComputeCanvas {...props} onContextLost={handleFailure} onReady={handleReady} />

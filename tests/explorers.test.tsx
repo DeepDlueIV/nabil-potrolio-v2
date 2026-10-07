@@ -5,9 +5,16 @@ import { Engagement } from '@/components/engagement/Engagement';
 import { Experience } from '@/components/experience/Experience';
 import { TechnologyExplorer } from '@/components/technology/TechnologyExplorer';
 import { About } from '@/components/about/About';
-import { ContactLinks } from '@/components/contact/ContactLinks';
+import { ContactLinks, SourceGitHubLink } from '@/components/contact/ContactLinks';
 
 describe('open professional content', () => {
+  it('links to the website source without inventing a personal GitHub contact', () => {
+    render(<><SourceGitHubLink /><ContactLinks contacts={{ email: '', github: '', linkedin: '' }} /></>);
+    const source = screen.getByRole('link', { name: 'Source on GitHub' });
+    expect(source).toHaveAttribute('href', 'https://github.com/DeepDlueIV/nabil-potrolio-v2');
+    expect(source.querySelector('svg')).not.toBeNull();
+    expect(screen.queryByRole('link', { name: 'GitHub profile' })).toBeNull();
+  });
   it('keeps all four roles and their full evidence visible without disclosure', () => {
     render(<Experience />);
     const record = screen.getByRole('region', { name: 'Career chronology' });
@@ -22,7 +29,7 @@ describe('open professional content', () => {
     const user = userEvent.setup();
     render(<Experience />);
     await user.click(screen.getByRole('button', { name: 'Show experience frame 4' }));
-    expect(screen.getByRole('button', { name: 'Continue presentation' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Resume experience presentation' })).toBeInTheDocument();
   });
 
   it('makes every tool purpose and standards context available without view-all', () => {

@@ -83,16 +83,16 @@ describe('presentation scheduling', () => {
     expect(screen.getByText('one:1:auto')).toBeInTheDocument();
   });
 
-  it('gives timer ownership to the most visible scene with boundary hysteresis', () => {
+  it('keeps two visible presentations independent even when one is more visible', () => {
     render(<PresentationProvider><Demo /><Demo id="two" /></PresentationProvider>);
     visible('one', .6);
     visible('two', .65);
     act(() => vi.advanceTimersByTime(1000));
     expect(screen.getByText('one:1:auto')).toBeInTheDocument();
-    expect(screen.getByText('two:0:auto')).toBeInTheDocument();
-    visible('two', .9);
-    act(() => vi.advanceTimersByTime(1000));
     expect(screen.getByText('two:1:auto')).toBeInTheDocument();
+    visible('two', .9);
+    act(() => vi.advanceTimersByTime(2000));
+    expect(screen.getByText('two:0:auto')).toBeInTheDocument();
   });
 
   it('hover pauses temporarily but focus holds after pointer exit', () => {

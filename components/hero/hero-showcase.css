@@ -17,7 +17,7 @@
 .hero-showcase .hero-meta { font-size: .65rem; line-height: 1.75; max-width: 32rem; }
 .showcase-system { min-width: 0; position: relative; align-self: center; }
 .rack-scene { position: relative; width: 100%; aspect-ratio: 1.12; touch-action: pan-y; }
-.hardware-poster { position: absolute; inset: 0; margin: 0; transition: opacity .3s; }
+.hardware-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; margin: 0; }
 .hardware-poster svg { width: 100%; height: 100%; overflow: visible; }
 .hardware-tray { transition: transform .8s cubic-bezier(.22,.7,.3,1); }
 .hardware-flow { stroke-dasharray: 10 800; animation: hardware-signal 6s linear infinite; }

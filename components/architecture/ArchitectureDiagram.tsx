@@ -12,12 +12,16 @@ const mobilePositions: Record<ArchitectureScenario['id'], Record<string, [number
 
 export function ArchitectureDiagram({ scenario, state, route, keyNode, running }: ArchitectureDiagramProps) {
   return <div className="architecture-flow" data-testid="architecture-diagram" data-load={state.loadMode} data-status={state.demoStatus} data-route={route.join('>')} data-running={running}>
+    <p className="architecture-boundary-label technical-label">{scenario.boundaryLabel}</p>
     {(['desktop', 'mobile'] as const).map((layout) => {
       const mobile = layout === 'mobile';
       const positions = new Map(scenario.nodes.map((node) => [node.id, mobile ? mobilePositions[scenario.id][node.id] : [node.x * 10, node.y * 6]]));
       const marker = `flow-arrow-${scenario.id}-${layout}`;
       return <svg key={layout} className={`architecture-flow__${layout}`} viewBox={mobile ? '0 0 360 600' : '0 0 1000 600'} aria-label={`${scenario.label}: ${state.demoStatus === 'queued' ? 'requests wait for inference' : 'highlighted request and response path'}`} role="img">
-        <defs><marker id={marker} viewBox="0 0 8 8" markerWidth="7" markerHeight="7" refX="6" refY="4" orient="auto-start-reverse"><path d="M0 0 L8 4 L0 8" fill="context-stroke" /></marker></defs>
+        <defs>
+          <pattern id={`map-grid-${scenario.id}-${layout}`} width="40" height="40" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="#7ee7f5" opacity=".12" /></pattern>
+        </defs>
+        <rect x="1" y="1" width={mobile ? 358 : 998} height="598" rx="2" fill={`url(#map-grid-${scenario.id}-${layout})`} stroke="#30414f" strokeDasharray="6 8" />
         {scenario.edges.map((edge) => {
           const from = positions.get(edge.from)!;
           const to = positions.get(edge.to)!;
@@ -32,8 +36,10 @@ export function ArchitectureDiagram({ scenario, state, route, keyNode, running }
           const clip = Math.min((mobile ? 76 : 88) / Math.max(Math.abs(dx), 1), 38 / Math.max(Math.abs(dy), 1));
           const end = [to[0] + dx * clip, to[1] + dy * clip];
           const d = returning ? `M${from[0]} ${from[1]} Q${bend[0]} ${bend[1]} ${end[0]} ${end[1]}` : `M${from[0]} ${from[1]} L${end[0]} ${end[1]}`;
+          const arrowColor = active ? returning ? '#a4a1c2' : '#7ee7f5' : '#344857';
           return <g key={edge.id} className={`flow-edge flow-edge--${edge.kind}${active ? ' is-active' : ''}${returning ? ' is-return' : ''}`}>
-            <path d={d} markerEnd={`url(#${marker})`} />
+            <defs><marker id={`${marker}-${edge.id}`} viewBox="0 0 8 8" markerWidth="7" markerHeight="7" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8" fill={arrowColor} /></marker></defs>
+            <path d={d} markerEnd={`url(#${marker}-${edge.id})`} />
             {active && Array.from({ length: state.loadMode === 'burst' ? 3 : 1 }, (_, index) => <circle key={index} r={mobile ? 3 : 4} style={{ offsetPath: `path('${d}')`, animationDelay: `${routeIndex * .26 + index * .12}s` } as CSSProperties} />)}
           </g>;
         })}

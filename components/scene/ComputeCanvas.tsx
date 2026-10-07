@@ -42,7 +42,7 @@ const fanVents = [-1.5, -.5, .5, 1.5].flatMap((x) => Array.from({ length: 9 }, (
 const railHoles = [-2.16, 2.16].flatMap((x) => Array.from({ length: 14 }, (_, i) => ({ position: [x, -1.8 + i * .28, 1.74] as V3, size: [.08, .11, .015] as V3 })));
 const safeCurvePoint = (curve: THREE.CatmullRomCurve3, progress: number) => curve.getPointAt(THREE.MathUtils.clamp(progress, 0, .999));
 
-function RackModel({ phase, running, active, reduced, pointer }: Omit<ComputeCanvasProps, 'onContextLost' | 'onReady'> & { pointer: React.RefObject<{ x: number; y: number }> }) {
+function RackModel({ phase, active, reduced, pointer }: Omit<ComputeCanvasProps, 'onContextLost' | 'onReady'> & { pointer: React.RefObject<{ x: number; y: number }> }) {
   const root = useRef<THREE.Group>(null);
   const drawer = useRef<THREE.Group>(null);
   const signal = useRef<THREE.Mesh>(null);
@@ -57,21 +57,23 @@ function RackModel({ phase, running, active, reduced, pointer }: Omit<ComputeCan
 
   useEffect(() => {
     start.current = null;
-    if (!running && drawer.current) drawer.current.position.z = target;
-    if (!running && root.current) root.current.rotation.set(0, 0, 0);
-    if (!running && signal.current) signal.current.position.copy(phase === 'flow' ? safeCurvePoint(route, .72) : safeCurvePoint(entry, .65));
+    if (reduced && drawer.current) drawer.current.position.z = target;
+    if (reduced && root.current) root.current.rotation.set(0, 0, 0);
+    if (reduced && signal.current) signal.current.position.copy(phase === 'flow' ? safeCurvePoint(route, .72) : safeCurvePoint(entry, .65));
     invalidate();
-  }, [phase, target, running, active, reduced, invalidate, route, entry]);
+  }, [phase, target, active, reduced, invalidate, route, entry]);
 
   useEffect(() => () => { wire.dispose(); entryWire.dispose(); }, [wire, entryWire]);
 
   useFrame((state, delta) => {
-    if (!running || !active) return;
+    // Удержание слайда не останавливает ручной переход и отрисовку ракурса.
+    if (!active || reduced) return;
+    delta = Math.min(delta, .05);
     if (start.current === null) start.current = state.clock.elapsedTime;
     if (drawer.current) drawer.current.position.z = THREE.MathUtils.damp(drawer.current.position.z, target, 4.5, delta);
     if (root.current) {
-      root.current.rotation.y = THREE.MathUtils.damp(root.current.rotation.y, reduced ? 0 : pointer.current.x * .045, 5, delta);
-      root.current.rotation.x = THREE.MathUtils.damp(root.current.rotation.x, reduced ? 0 : pointer.current.y * .025, 5, delta);
+      root.current.rotation.y = THREE.MathUtils.damp(root.current.rotation.y, pointer.current.x * .1, 5, delta);
+      root.current.rotation.x = THREE.MathUtils.damp(root.current.rotation.x, pointer.current.y * .055, 5, delta);
     }
     if (signal.current) {
       const elapsed = state.clock.elapsedTime - start.current;
@@ -125,10 +127,10 @@ function RackModel({ phase, running, active, reduced, pointer }: Omit<ComputeCan
         <Block position={[-1.7 + i * .45, -1.1, 1.69]} size={[.035, .035, .01]} material={cyan} />
       </group>)}
       <mesh geometry={entryWire} material={cableMaterial} />
-      {phase === 'flow' && <mesh geometry={wire} material={cyan} />}
+      {phase === 'flow' && <mesh geometry={wire} renderOrder={2}><meshBasicMaterial color="#7ee7f5" transparent opacity={.7} depthTest={false} /></mesh>}
       <mesh ref={signal} visible={phase === 'system' || phase === 'flow'} position={[-3.6, 1.42, 1.75]}>
-        <sphereGeometry args={[.065, 12, 10]} />
-        <meshBasicMaterial color="#d8fcff" />
+        <sphereGeometry args={[.11, 16, 12]} />
+        <meshBasicMaterial color="#d8fcff" depthTest={false} />
       </mesh>
     </group>
   );
@@ -136,19 +138,26 @@ function RackModel({ phase, running, active, reduced, pointer }: Omit<ComputeCan
 
 function CanvasLifecycle({ onContextLost, onReady }: Pick<ComputeCanvasProps, 'onContextLost' | 'onReady'>) {
   const gl = useThree((state) => state.gl);
+  const invalidate = useThree((state) => state.invalidate);
+  const rendered = useRef(false);
+  useFrame(() => {
+    if (rendered.current) return;
+    // Ready подтверждает предыдущий реально отрисованный кадр, а не mount canvas.
+    if (gl.info.render.calls > 0) { rendered.current = true; onReady(); }
+    else invalidate();
+  });
   useEffect(() => {
     const canvas = gl.domElement;
     const lost = (event: Event) => { event.preventDefault(); onContextLost(); };
     canvas.addEventListener('webglcontextlost', lost);
-    const frame = requestAnimationFrame(onReady);
-    return () => { canvas.removeEventListener('webglcontextlost', lost); cancelAnimationFrame(frame); };
-  }, [gl, onContextLost, onReady]);
+    return () => { canvas.removeEventListener('webglcontextlost', lost); };
+  }, [gl, onContextLost]);
   return null;
 }
 
 export function ComputeCanvas({ onContextLost, onReady, ...props }: ComputeCanvasProps) {
   const pointer = useRef({ x: 0, y: 0 });
-  const canParallax = props.active && props.running && !props.reduced;
+  const canParallax = props.active && !props.reduced;
   return (
     <div className="hardware-canvas" aria-hidden="true"
       onPointerMove={(event) => {
@@ -159,7 +168,7 @@ export function ComputeCanvas({ onContextLost, onReady, ...props }: ComputeCanva
       onPointerLeave={() => { pointer.current = { x: 0, y: 0 }; }}
     >
       <Canvas camera={{ position: [7, 4.8, 8.7], fov: 35, near: .1, far: 50 }} dpr={[1, 1.5]}
-        frameloop={props.running && props.active ? 'always' : 'demand'}
+        frameloop={props.active && !props.reduced ? 'always' : 'demand'}
         gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
         onCreated={({ gl, camera }) => { gl.setClearColor(0x090d13, 0); camera.lookAt(0, 0, .4); }}>
         <ambientLight intensity={1.1} />

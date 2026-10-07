@@ -7,28 +7,26 @@ type PresentationContextValue = {
   pageVisible: boolean;
   register: (id: string, element: HTMLElement) => () => void;
   coordinated: boolean;
+  visibleIds: ReadonlySet<string>;
 };
 
 const PresentationContext = createContext<PresentationContextValue>({
-  activeId: null, pageVisible: true, register: () => () => undefined, coordinated: false,
+  activeId: null, pageVisible: true, register: () => () => undefined, coordinated: false, visibleIds: new Set(),
 });
 
 export function PresentationProvider({ children }: { children: ReactNode }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [pageVisible, setPageVisible] = useState(true);
+  const [visibleIds, setVisibleIds] = useState<ReadonlySet<string>>(new Set());
   const entries = useRef(new Map<string, { element: HTMLElement; ratio: number }>());
   const observer = useRef<IntersectionObserver | null>(null);
-  const currentId = useRef<string | null>(null);
 
   const choose = useCallback(() => {
     const candidates = Array.from(entries.current.entries()).sort((a, b) => b[1].ratio - a[1].ratio);
     const best = candidates[0];
-    const currentRatio = currentId.current ? entries.current.get(currentId.current)?.ratio ?? 0 : 0;
-    // Гистерезис удерживает владельца у границы двух видимых сцен.
-    const next = !best || best[1].ratio < .12 ? null
-      : currentRatio >= .12 && best[1].ratio < currentRatio + .15 ? currentId.current : best[0];
-    currentId.current = next;
-    setActiveId(next);
+    // Видимые показы независимы: соседний блок не отбирает время у текущего.
+    setVisibleIds(new Set(candidates.filter(([, entry]) => entry.ratio > 0).map(([id]) => id)));
+    setActiveId(best && best[1].ratio > 0 ? best[0] : null);
   }, []);
 
   useEffect(() => {
@@ -42,7 +40,7 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
           if (entry) entry.ratio = update.isIntersecting ? update.intersectionRatio : 0;
         }
         choose();
-      }, { threshold: [0, .12, .25, .4, .55, .7, .85, 1] });
+      }, { threshold: [0, .01, .1, .5, 1] });
       for (const entry of entries.current.values()) observer.current.observe(entry.element);
     } else {
       for (const entry of entries.current.values()) entry.ratio = 1;
@@ -65,7 +63,7 @@ export function PresentationProvider({ children }: { children: ReactNode }) {
     };
   }, [choose]);
 
-  const value = useMemo(() => ({ activeId, pageVisible, register, coordinated: true }), [activeId, pageVisible, register]);
+  const value = useMemo(() => ({ activeId, pageVisible, register, coordinated: true, visibleIds }), [activeId, pageVisible, register, visibleIds]);
   return <PresentationContext.Provider value={value}>{children}</PresentationContext.Provider>;
 }
 

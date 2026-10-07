@@ -11,7 +11,7 @@ test('core content and screenshots at five target widths', async ({ page }) => {
     await expect(page.getByRole('region', { name: 'Career chronology' }).locator('article')).toHaveCount(4);
     await expect(page.getByRole('region', { name: 'Complete technology stack' }).locator('li')).toHaveCount(34);
     await expect(page.locator('details')).toHaveCount(0);
-    await expect(page.getByRole('button', { name: /Reduce motion|Pause|Reset|Send/i })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: /Reduce motion|Reset|Send/i })).toHaveCount(0);
     expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
     await page.locator('.rack-scene[data-webgl="active"]').waitFor({ timeout: 15000 });
     await page.screenshot({ path: `output/playwright/showcase-after-${width}-hero.png` });
@@ -49,14 +49,14 @@ test('manual holds and contact workflow', async ({ page, context }) => {
   await expect(architecture.getByRole('heading', { name: 'Authenticated request' })).toBeVisible();
   await page.waitForTimeout(3500);
   await expect(architecture.getByRole('heading', { name: 'Authenticated request' })).toBeVisible();
-  await architecture.getByRole('button', { name: 'Continue presentation' }).click();
+  await architecture.getByRole('button', { name: 'Resume architecture presentation' }).click();
   await expect(architecture.getByRole('heading', { name: 'Policy and inference' })).toBeVisible({ timeout: 4500 });
   await page.getByRole('button', { name: 'Show experience frame 4' }).click();
   await expect(page.locator('.experience-showcase')).toHaveAttribute('data-requested', '3');
   await expect(page.locator('.experience-showcase')).toHaveAttribute('data-frame', '3', { timeout: 8000 });
   await expect(page.locator('.experience-showcase h3')).toHaveText('Full-Stack Systems Engineer');
-  await page.locator('.experience-showcase').getByRole('button', { name: 'Continue presentation' }).click();
-  await expect(page.getByRole('button', { name: 'Show experience frame 4' })).toBeFocused();
+  await page.locator('.experience-showcase').getByRole('button', { name: 'Resume experience presentation' }).click();
+  await expect(page.locator('.experience-showcase').getByRole('button', { name: 'Pause experience presentation' })).toBeFocused();
   await page.getByRole('button', { name: 'Data & streaming', exact: true }).click();
   await expect(page.locator('#technology').getByRole('heading', { name: 'Apache Kafka', exact: true })).toBeVisible();
   await expect(page.getByRole('region', { name: 'Complete technology stack' }).getByText('ISO 27001', { exact: true })).toBeVisible();

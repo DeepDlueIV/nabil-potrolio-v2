@@ -10,12 +10,14 @@ import { SiteHeader } from '@/components/ui/SiteHeader';
 import { profile } from '@/data/profile';
 import { getContactAvailabilityCopy } from '@/lib/contact/brief';
 import { About } from '@/components/about/About';
-import { ContactLinks } from '@/components/contact/ContactLinks';
+import { ContactLinks, SourceGitHubLink } from '@/components/contact/ContactLinks';
 import { PresentationProvider } from '@/components/presentation/PresentationProvider';
+import { AnchorNavigation } from '@/components/ui/AnchorNavigation';
 
 export default function HomePage() {
   return (
     <MotionProvider>
+      <AnchorNavigation />
       <PresentationProvider>
       <a className="skip-link" href="#expertise">Skip to content</a>
       <SiteHeader />
@@ -46,7 +48,7 @@ export default function HomePage() {
       <footer className="site-footer">
         <div><strong>{profile.name}</strong><span>{profile.title}</span></div>
         <p>{profile.location} · {profile.availability}</p>
-        <p className="technical-label">Independent portfolio / 2026</p>
+        <div><p className="technical-label">Independent portfolio / 2026</p><SourceGitHubLink /></div>
       </footer>
       </PresentationProvider>
     </MotionProvider>

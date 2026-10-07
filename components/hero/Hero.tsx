@@ -1,6 +1,7 @@
 'use client';
 
 import { profile } from '@/data/profile';
+import { useCallback, useState } from 'react';
 import { usePresentation } from '../presentation/usePresentation';
 import { ComputeScene } from '../scene/ComputeScene';
 import { heroDurations, heroPhases } from '../scene/compute-model';
@@ -8,7 +9,9 @@ import { HeroNarrative } from './HeroNarrative';
 import './hero-showcase.css';
 
 export function Hero({ forceFallback = false }: { forceFallback?: boolean }) {
-  const { ref, step, running, active, pageVisible, reduced, held, duration, progressKey, select, resume } = usePresentation({ id: 'hero', durations: heroDurations });
+  const [ready, setReady] = useState(forceFallback);
+  const onReady = useCallback(() => setReady(true), []);
+  const { ref, step, running, active, pageVisible, reduced, held, duration, progressKey, progress, select, resume, pause } = usePresentation({ id: 'hero', durations: heroDurations, ready });
   const phase = heroPhases[step];
 
   return (
@@ -32,6 +35,7 @@ export function Hero({ forceFallback = false }: { forceFallback?: boolean }) {
             active={active && pageVisible}
             reduced={reduced}
             forceFallback={forceFallback}
+            onSceneReady={onReady}
           />
           <p className="showcase-caption">A private AI system — from request to response</p>
           <HeroNarrative
@@ -40,6 +44,9 @@ export function Hero({ forceFallback = false }: { forceFallback?: boolean }) {
             running={running}
             duration={duration}
             progressKey={progressKey}
+            progress={progress}
+            reduced={reduced}
+            onPause={pause}
             onSelect={select}
             onResume={resume}
           />

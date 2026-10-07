@@ -1,16 +1,19 @@
 'use client';
 
-import { useRef, type CSSProperties, type KeyboardEvent } from 'react';
+import { useRef, type KeyboardEvent } from 'react';
 import { phaseCopy, type ScenePhase } from '../scene/compute-model';
 
 const phases: ScenePhase[] = ['system', 'inside', 'flow'];
 
-export function HeroNarrative({ phase, held, running, duration, progressKey, onSelect, onResume }: {
+export function HeroNarrative({ phase, held, progress, reduced, onPause, onSelect, onResume }: {
   phase: ScenePhase;
   held: boolean;
   running: boolean;
   duration: number;
   progressKey: string;
+  progress: number;
+  reduced: boolean;
+  onPause: () => void;
   onSelect: (index: number) => void;
   onResume: () => void;
 }) {
@@ -44,14 +47,12 @@ export function HeroNarrative({ phase, held, running, duration, progressKey, onS
             onClick={() => onSelect(index)}
           >{phaseCopy[item].title}</button>
         ))}
+        {!reduced && <button data-presentation-playback type="button" aria-label={held ? 'Resume server presentation' : 'Pause server presentation'} onClick={held ? onResume : onPause}>{held ? '▶' : 'Ⅱ'}</button>}
       </div>
       <div className="showcase-progress" aria-hidden="true">
-        <span key={progressKey} style={{ '--step-duration': `${duration}ms`, animationPlayState: running ? 'running' : 'paused' } as CSSProperties} />
+        <span style={{ animation: 'none', transform: `scaleX(${progress})` }} />
       </div>
       <p id="hero-phase-description" role="tabpanel" aria-labelledby={`hero-tab-${selected}`} className="showcase-phase-copy">{phaseCopy[phase].body}</p>
-      <div className="showcase-resume-slot">
-        {held && <button className="showcase-resume" type="button" onClick={() => { tabs.current[phases.indexOf(selected)]?.focus({ preventScroll: true }); onResume(); }}>Continue presentation <span aria-hidden="true">→</span></button>}
-      </div>
     </div>
   );
 }
