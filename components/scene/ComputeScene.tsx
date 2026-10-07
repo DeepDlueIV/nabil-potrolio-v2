@@ -1,34 +1,41 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { Component, useCallback, useEffect, useState, type ReactNode } from 'react';
 import { ComputePoster } from './ComputePoster';
-import type { SceneComponentId, SceneMode, ScenePhase } from './compute-model';
+import type { ScenePhase } from './compute-model';
 
 const ComputeCanvas = dynamic(() => import('./ComputeCanvas').then((module) => module.ComputeCanvas), { ssr: false });
 
 export type ComputeSceneProps = {
-  mode: SceneMode;
-  selected: SceneComponentId;
   phase: ScenePhase;
-  paused: boolean;
+  running: boolean;
+  active: boolean;
+  reduced: boolean;
   forceFallback?: boolean;
 };
 
+class SceneBoundary extends Component<{ children: ReactNode; onFailure: () => void }, { failed: boolean }> {
+  state = { failed: false };
+  static getDerivedStateFromError() { return { failed: true }; }
+  componentDidCatch() { this.props.onFailure(); }
+  render() { return this.state.failed ? null : this.props.children; }
+}
+
 function supportsWebGL() {
   try {
-    const canvas = document.createElement('canvas');
-    return Boolean(canvas.getContext('webgl2') || canvas.getContext('webgl'));
-  } catch {
-    return false;
-  }
+    const context = document.createElement('canvas').getContext('webgl2');
+    if (!context) return false;
+    context.getExtension('WEBGL_lose_context')?.loseContext();
+    return true;
+  } catch { return false; }
 }
 
 export function ComputeScene(props: ComputeSceneProps) {
   const [webgl, setWebgl] = useState(false);
-  const [visible, setVisible] = useState(true);
-  const container = useRef<HTMLDivElement>(null);
-  const handleContextLost = useCallback(() => setWebgl(false), []);
+  const [ready, setReady] = useState(false);
+  const handleFailure = useCallback(() => { setWebgl(false); setReady(false); }, []);
+  const handleReady = useCallback(() => setReady(true), []);
 
   useEffect(() => {
     if (props.forceFallback) return;
@@ -36,24 +43,21 @@ export function ComputeScene(props: ComputeSceneProps) {
     return () => window.clearTimeout(timer);
   }, [props.forceFallback]);
 
-  useEffect(() => {
-    const element = container.current;
-    if (!element || typeof IntersectionObserver === 'undefined') return;
-    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { rootMargin: '100px' });
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
+  const inside = props.phase === 'inside' || props.phase === 'flow';
   return (
-    <div
-      ref={container}
-      className="compute-scene"
-      data-webgl={webgl ? 'active' : 'fallback'}
-      data-paused={props.paused}
-      data-testid="compute-scene"
-    >
-      <ComputePoster mode={props.mode} selected={props.selected} phase={props.phase} />
-      {webgl && <ComputeCanvas mode={props.mode} selected={props.selected} phase={props.phase} paused={props.paused} visible={visible} onContextLost={handleContextLost} />}
+    <div className="rack-scene" data-webgl={webgl && ready ? 'active' : 'fallback'} data-phase={props.phase} data-running={props.running} data-active={props.active} data-reduced={props.reduced} data-testid="compute-scene">
+      <ComputePoster phase={props.phase} running={props.running} reduced={props.reduced} />
+      {webgl && !props.forceFallback && (
+        <SceneBoundary onFailure={handleFailure}>
+          <ComputeCanvas {...props} onContextLost={handleFailure} onReady={handleReady} />
+        </SceneBoundary>
+      )}
+      <div className="rack-callouts" aria-hidden="true">
+        <span className="rack-label rack-label-network">Network entry</span>
+        <span className={`rack-label rack-label-compute ${inside ? 'is-open' : ''}`}>{inside ? '8 accelerators · shared interconnect' : 'GPU compute tray'}</span>
+        <span className="rack-label rack-label-data">Context &amp; storage</span>
+      </div>
+      {props.phase === 'flow' && <p className="rack-flow-legend"><span>Request</span><span>Context</span><span>Inference</span><span>Response</span></p>}
     </div>
   );
 }

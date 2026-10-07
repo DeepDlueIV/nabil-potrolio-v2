@@ -1,77 +1,50 @@
 'use client';
 
-import { useCallback, useState } from 'react';
 import { profile } from '@/data/profile';
+import { usePresentation } from '../presentation/usePresentation';
 import { ComputeScene } from '../scene/ComputeScene';
-import { useMotionPreference } from '../ui/MotionProvider';
-import { sceneComponents, type SceneComponentId, type SceneMode, type ScenePhase } from '../scene/compute-model';
+import { heroDurations, heroPhases } from '../scene/compute-model';
 import { HeroNarrative } from './HeroNarrative';
+import './hero-showcase.css';
 
 export function Hero({ forceFallback = false }: { forceFallback?: boolean }) {
-  const [mode, setMode] = useState<SceneMode>('assembled');
-  const [selected, setSelected] = useState<SceneComponentId>('accelerators');
-  const [phase, setPhase] = useState<ScenePhase>('compute');
-  const [paused, setPaused] = useState(false);
-  const { preference } = useMotionPreference();
-  const reduced = preference === 'reduced';
-  const motionPaused = paused || reduced;
-  const selectPhase = useCallback((next: ScenePhase) => setPhase(next), []);
-  const selectedComponent = sceneComponents.find((component) => component.id === selected) ?? sceneComponents[0];
+  const { ref, step, running, active, pageVisible, reduced, held, duration, progressKey, select, resume } = usePresentation({ id: 'hero', durations: heroDurations });
+  const phase = heroPhases[step];
 
   return (
-    <section className="hero" id="top" data-motion={motionPaused ? 'paused' : 'full'} aria-labelledby="hero-title">
-      <div className="hero-sticky">
-        <div className="hero-grid">
-          <div className="hero-copy">
-            <p className="hero-identity">Nabil Rakdani</p>
-            <p className="technical-label hero-role">{profile.title}<br />{profile.secondaryTitle}</p>
-            <h1 id="hero-title" aria-label="Intelligence, engineered.">Intelligence,<br /><em>engineered.</em></h1>
-            <p className="hero-lede">{profile.description}</p>
-            <div className="hero-actions">
-              <a className="button" href="#contact">Discuss your infrastructure <span aria-hidden="true">↗</span></a>
-              <a className="text-link" href="#architecture">Explore the architecture <span aria-hidden="true">↓</span></a>
-            </div>
-            <p className="hero-meta technical-label">{profile.location} <span /> {profile.availability} <span /> {profile.years} years of experience</p>
+    <section className="hero hero-showcase" id="top" aria-labelledby="hero-title">
+      <div className="showcase-layout">
+        <div className="hero-copy">
+          <p className="hero-identity">{profile.name}</p>
+          <p className="technical-label hero-role">{profile.title}<br />{profile.secondaryTitle}</p>
+          <h1 id="hero-title" aria-label="Intelligence, engineered.">Intelligence,<br /><em>engineered.</em></h1>
+          <p className="hero-lede">{profile.description}</p>
+          <div className="hero-actions">
+            <a className="button" href="#contact">Discuss your infrastructure <span aria-hidden="true">↗</span></a>
+            <a className="text-link" href="#architecture">Explore the architecture <span aria-hidden="true">↓</span></a>
           </div>
-
-          <div className="hero-system">
-            <ComputeScene mode={mode} selected={selected} phase={phase} paused={motionPaused} forceFallback={forceFallback} />
-            <div className="scene-toolbar">
-              <div className="segmented" aria-label="Scene arrangement">
-                {(['assembled', 'exploded'] as SceneMode[]).map((item) => (
-                  <button key={item} type="button" aria-pressed={mode === item} onClick={() => setMode(item)}>{item[0].toUpperCase() + item.slice(1)}</button>
-                ))}
-              </div>
-              <button
-                className="motion-pause"
-                type="button"
-                aria-label={reduced ? 'Motion reduced globally' : undefined}
-                aria-pressed={motionPaused}
-                disabled={reduced}
-                onClick={() => setPaused((value) => !value)}
-              >
-                {reduced ? 'Motion reduced globally' : paused ? 'Resume motion' : 'Pause motion'}
-              </button>
-            </div>
-            <p className="sr-only" role="status" aria-label="Scene mode">{mode === 'assembled' ? 'Assembled view active' : 'Exploded view active'}</p>
-            <div className="component-controls" aria-label="Compute cluster components">
-              {sceneComponents.map((component, index) => (
-                <button
-                  key={component.id}
-                  type="button"
-                  className={selected === component.id ? 'is-selected' : ''}
-                  aria-pressed={selected === component.id}
-                  aria-label={`Select ${component.label.toLowerCase()}`}
-                  onClick={() => setSelected(component.id)}
-                >
-                  <span>0{index + 1}</span>{component.shortLabel}
-                </button>
-              ))}
-            </div>
-            <p className="component-description" role="status" aria-label="Selected component">{selectedComponent.description}</p>
-          </div>
+          <p className="hero-meta technical-label">{profile.location} <span /> {profile.availability} <span /> {profile.years} years of experience</p>
         </div>
-        <HeroNarrative activePhase={phase} onPhaseChange={selectPhase} reduced={motionPaused} />
+        <div className="showcase-system" ref={ref}>
+          <ComputeScene
+            phase={phase}
+            running={running}
+            active={active && pageVisible}
+            reduced={reduced}
+            forceFallback={forceFallback}
+          />
+          <p className="showcase-caption">A private AI system — from request to response</p>
+          <HeroNarrative
+            phase={phase}
+            held={held}
+            running={running}
+            duration={duration}
+            progressKey={progressKey}
+            onSelect={select}
+            onResume={resume}
+          />
+          <p className="showcase-note">Illustrative infrastructure</p>
+        </div>
       </div>
     </section>
   );

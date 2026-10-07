@@ -1,84 +1,56 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, type CSSProperties, type KeyboardEvent } from 'react';
 import { phaseCopy, type ScenePhase } from '../scene/compute-model';
 
-const phases: ScenePhase[] = ['compute', 'orchestration', 'system'];
+const phases: ScenePhase[] = ['system', 'inside', 'flow'];
 
-export function HeroNarrative({
-  activePhase,
-  onPhaseChange,
-  reduced,
-}: {
-  activePhase: ScenePhase;
-  onPhaseChange: (phase: ScenePhase) => void;
-  reduced: boolean;
+export function HeroNarrative({ phase, held, running, duration, progressKey, onSelect, onResume }: {
+  phase: ScenePhase;
+  held: boolean;
+  running: boolean;
+  duration: number;
+  progressKey: string;
+  onSelect: (index: number) => void;
+  onResume: () => void;
 }) {
-  const root = useRef<HTMLDivElement>(null);
-  const phaseTabs = useRef<Array<HTMLButtonElement | null>>([]);
-  const [manual, setManual] = useState(false);
-
-  const handlePhaseKey = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
-    let nextIndex: number;
-    if (event.key === 'ArrowRight') nextIndex = (index + 1) % phases.length;
-    else if (event.key === 'ArrowLeft') nextIndex = (index - 1 + phases.length) % phases.length;
-    else if (event.key === 'Home') nextIndex = 0;
-    else if (event.key === 'End') nextIndex = phases.length - 1;
-    else return;
-
+  const tabs = useRef<Array<HTMLButtonElement | null>>([]);
+  const selected = phase === 'return' ? 'system' : phase;
+  const handleKey = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const next = event.key === 'ArrowRight' ? (index + 1) % 3
+      : event.key === 'ArrowLeft' ? (index + 2) % 3
+      : event.key === 'Home' ? 0 : event.key === 'End' ? 2 : null;
+    if (next === null) return;
     event.preventDefault();
-    setManual(true);
-    onPhaseChange(phases[nextIndex]);
-    phaseTabs.current[nextIndex]?.focus();
+    onSelect(next);
+    tabs.current[next]?.focus();
   };
 
-  useEffect(() => {
-    if (manual || reduced || !root.current || typeof window.matchMedia !== 'function' || window.matchMedia('(max-width: 840px), (prefers-reduced-motion: reduce)').matches) return;
-    let cleanup = () => {};
-    let cancelled = false;
-
-    void Promise.all([import('gsap'), import('gsap/ScrollTrigger')]).then(([gsapModule, triggerModule]) => {
-      if (cancelled || !root.current) return;
-      const gsap = gsapModule.gsap;
-      const ScrollTrigger = triggerModule.ScrollTrigger;
-      gsap.registerPlugin(ScrollTrigger);
-      const trigger = ScrollTrigger.create({
-        trigger: root.current.closest('.hero'),
-        start: 'top top',
-        end: 'bottom bottom',
-        onUpdate: ({ progress }) => onPhaseChange(phases[Math.min(2, Math.floor(progress * 3))]),
-      });
-      cleanup = () => trigger.kill();
-    });
-
-    return () => {
-      cancelled = true;
-      cleanup();
-    };
-  }, [manual, onPhaseChange, reduced]);
-
   return (
-    <div className="hero-narrative" ref={root} aria-label="System narrative">
-      <div className="phase-tabs" role="tablist" aria-label="Architecture phase">
-        {phases.map((phase, index) => (
+    <div className="showcase-narrative">
+      <div className="showcase-tabs" role="tablist" aria-label="Server presentation">
+        {phases.map((item, index) => (
           <button
-            key={phase}
-            ref={(node) => { phaseTabs.current[index] = node; }}
+            key={item}
+            id={`hero-tab-${item}`}
+            ref={(node) => { tabs.current[index] = node; }}
             type="button"
             role="tab"
-            aria-selected={activePhase === phase}
-            tabIndex={activePhase === phase ? 0 : -1}
-            onKeyDown={(event) => handlePhaseKey(event, index)}
-            onClick={() => { setManual(true); onPhaseChange(phase); }}
-          >
-            <span>{phaseCopy[phase].index}</span>{phaseCopy[phase].title}
-          </button>
+            aria-controls="hero-phase-description"
+            aria-selected={selected === item}
+            tabIndex={selected === item ? 0 : -1}
+            onFocus={() => onSelect(index)}
+            onKeyDown={(event) => handleKey(event, index)}
+            onClick={() => onSelect(index)}
+          >{phaseCopy[item].title}</button>
         ))}
       </div>
-      <div className="phase-copy" aria-live="polite">
-        <p className="technical-label">PHASE {phaseCopy[activePhase].index}</p>
-        <h2>{phaseCopy[activePhase].title}</h2>
-        <p>{phaseCopy[activePhase].body}</p>
+      <div className="showcase-progress" aria-hidden="true">
+        <span key={progressKey} style={{ '--step-duration': `${duration}ms`, animationPlayState: running ? 'running' : 'paused' } as CSSProperties} />
+      </div>
+      <p id="hero-phase-description" role="tabpanel" aria-labelledby={`hero-tab-${selected}`} className="showcase-phase-copy">{phaseCopy[phase].body}</p>
+      <div className="showcase-resume-slot">
+        {held && <button className="showcase-resume" type="button" onClick={onResume}>Continue presentation <span aria-hidden="true">→</span></button>}
       </div>
     </div>
   );

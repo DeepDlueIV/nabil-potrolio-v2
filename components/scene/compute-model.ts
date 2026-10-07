@@ -1,21 +1,17 @@
-export type SceneMode = 'assembled' | 'exploded';
-export type ScenePhase = 'compute' | 'orchestration' | 'system';
-export type SceneComponentId = 'accelerators' | 'fabric' | 'gateway' | 'data';
+export type ScenePhase = 'system' | 'inside' | 'flow' | 'return';
 
-export const sceneComponents: Array<{
-  id: SceneComponentId;
-  label: string;
-  shortLabel: string;
-  description: string;
-}> = [
-  { id: 'accelerators', label: 'Accelerator blades', shortLabel: 'GPU compute', description: 'Four accelerator blades represent parallel private inference capacity.' },
-  { id: 'fabric', label: 'Interconnect fabric', shortLabel: 'Fabric', description: 'The fabric carries addressed work between compute, gateway, and data services.' },
-  { id: 'gateway', label: 'Policy gateway', shortLabel: 'Gateway', description: 'The gateway establishes the entry boundary for identity, policy, and request routing.' },
-  { id: 'data', label: 'Data layer', shortLabel: 'Data', description: 'The data layer supplies retrieval context and operational state without pretending every request traverses every store.' },
-];
-
-export const phaseCopy: Record<ScenePhase, { index: string; title: string; body: string }> = {
-  compute: { index: '01', title: 'Compute', body: 'Private inference begins with deliberately placed GPU capacity and a serving runtime the team can operate.' },
-  orchestration: { index: '02', title: 'Orchestration', body: 'Replicas, routing, and workload control turn isolated accelerators into a resilient compute plane.' },
-  system: { index: '03', title: 'System', body: 'Data, identity, and observability reveal the whole operating boundary—not just the model at its center.' },
+export const heroDurations = [4000, 6000, 6000, 4000] as const;
+export const heroPhases: ScenePhase[] = ['system', 'inside', 'flow', 'return'];
+export const phaseCopy: Record<ScenePhase, { title: string; body: string }> = {
+  system: { title: 'System', body: 'Private AI infrastructure.' },
+  inside: { title: 'Inside', body: 'GPU compute and high-speed connections.' },
+  flow: { title: 'Data flow', body: 'Requests, context, inference, response.' },
+  return: { title: 'System', body: 'Private AI infrastructure. Ready for the next request.' },
 };
+
+// Общий маршрут проходит по кабелю, портам, хранилищу и вычислительному лотку.
+export const requestRoute: [number, number, number][] = [
+  [-3.6, 1.42, 1.75], [-2.6, 1.42, 1.75], [-2.45, 1.42, 1.62],
+  [-1.55, 1.42, 1.62], [-1.55, -1.25, 1.62], [.75, -1.25, 1.62],
+  [.75, .12, 2.95], [.75, .18, 1.45], [-.75, .18, 1.45],
+];
