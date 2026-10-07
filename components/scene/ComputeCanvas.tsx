@@ -40,6 +40,7 @@ const acceleratorPositions: V3[] = Array.from({ length: 8 }, (_, index) => [inde
 const heatsinkFins = acceleratorPositions.flatMap(([x, y, z]) => Array.from({ length: 7 }, (_, index) => ({ position: [x - .48 + index * .16, y + .13, z] as V3, size: [.035, .15, .52] as V3 })));
 const fanVents = [-1.5, -.5, .5, 1.5].flatMap((x) => Array.from({ length: 9 }, (_, i) => ({ position: [x - .36 + i * .09, -.18, 1.56] as V3, size: [.035, .43, .025] as V3 })));
 const railHoles = [-2.16, 2.16].flatMap((x) => Array.from({ length: 14 }, (_, i) => ({ position: [x, -1.8 + i * .28, 1.74] as V3, size: [.08, .11, .015] as V3 })));
+const safeCurvePoint = (curve: THREE.CatmullRomCurve3, progress: number) => curve.getPointAt(THREE.MathUtils.clamp(progress, 0, .999));
 
 function RackModel({ phase, running, active, reduced, pointer }: Omit<ComputeCanvasProps, 'onContextLost' | 'onReady'> & { pointer: React.RefObject<{ x: number; y: number }> }) {
   const root = useRef<THREE.Group>(null);
@@ -58,7 +59,7 @@ function RackModel({ phase, running, active, reduced, pointer }: Omit<ComputeCan
     start.current = null;
     if (!running && drawer.current) drawer.current.position.z = target;
     if (!running && root.current) root.current.rotation.set(0, 0, 0);
-    if (!running && signal.current) signal.current.position.copy(phase === 'flow' ? route.getPointAt(.72) : entry.getPointAt(.65));
+    if (!running && signal.current) signal.current.position.copy(phase === 'flow' ? safeCurvePoint(route, .72) : safeCurvePoint(entry, .65));
     invalidate();
   }, [phase, target, running, active, reduced, invalidate, route, entry]);
 
@@ -74,11 +75,11 @@ function RackModel({ phase, running, active, reduced, pointer }: Omit<ComputeCan
     }
     if (signal.current) {
       const elapsed = state.clock.elapsedTime - start.current;
-      if (phase === 'system') signal.current.position.copy(entry.getPointAt(Math.min(1, (elapsed % 4) / 3)));
+      if (phase === 'system') signal.current.position.copy(safeCurvePoint(entry, (elapsed % 4) / 3));
       else if (phase === 'flow') {
         const progress = elapsed % 6;
         const position = progress < 2.8 ? progress / 2.8 : progress < 3.4 ? 1 : 1 - (progress - 3.4) / 2.6;
-        signal.current.position.copy(route.getPointAt(Math.max(0, Math.min(1, position))));
+        signal.current.position.copy(safeCurvePoint(route, position));
       }
     }
   });
