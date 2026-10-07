@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('experience navigation remains with the decoded visible frame', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('nabil-motion', 'reduced'));
   await page.emulateMedia({ reducedMotion: 'reduce' });
   let releaseImage: () => void = () => undefined;
   const imageGate = new Promise<void>((resolve) => { releaseImage = resolve; });

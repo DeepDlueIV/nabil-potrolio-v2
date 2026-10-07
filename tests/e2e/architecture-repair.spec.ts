@@ -20,6 +20,7 @@ test('architecture holds the scenario without freezing its healthy packet flow',
 });
 
 test('architecture panel preserves its compact shell across viewport widths', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('nabil-motion', 'reduced'));
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const width of [1440, 1280, 900, 390]) {
     await page.setViewportSize({ width, height: width < 700 ? 844 : 900 });

@@ -87,4 +87,5 @@
   .rack-flow-legend span + span::before { margin-right: .45rem; }
   .showcase-tabs { gap: 1.6rem; }
 }
-@media (prefers-reduced-motion: reduce) { .hardware-tray, .hardware-poster { transition: none; } .hardware-flow, .showcase-progress span { animation: none; } }
+html[data-motion='reduced'] .hardware-tray, html[data-motion='reduced'] .hardware-poster { transition: none; }
+html[data-motion='reduced'] .hardware-flow, html[data-motion='reduced'] .showcase-progress span { animation: none; }

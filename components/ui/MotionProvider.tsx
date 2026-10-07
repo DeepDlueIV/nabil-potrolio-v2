@@ -1,29 +1,37 @@
 'use client';
 
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 
 type MotionPreference = 'full' | 'reduced';
 
 type MotionContextValue = {
   preference: MotionPreference;
+  setPreference: (preference: MotionPreference) => void;
 };
 
 const defaultMotionContext: MotionContextValue = {
   preference: 'full',
+  setPreference: () => undefined,
 };
 
 const MotionContext = createContext<MotionContextValue>(defaultMotionContext);
 
 export function MotionProvider({ children }: { children: ReactNode }) {
-  const [preference, setPreference] = useState<MotionPreference>('full');
+  const [preference, updatePreference] = useState<MotionPreference>('full');
 
   useEffect(() => {
-    const media = window.matchMedia?.('(prefers-reduced-motion: reduce)');
-    if (!media) return;
-    const update = () => setPreference(media.matches ? 'reduced' : 'full');
-    const frame = requestAnimationFrame(update);
-    media.addEventListener('change', update);
-    return () => { cancelAnimationFrame(frame); media.removeEventListener('change', update); };
+    // Презентация запускается по умолчанию; отключение движения — явный выбор посетителя.
+    const frame = requestAnimationFrame(() => {
+      try {
+        if (localStorage.getItem('nabil-motion') === 'reduced') updatePreference('reduced');
+      } catch { /* Блокировка хранилища не должна останавливать презентацию. */ }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
+  const setPreference = useCallback((next: MotionPreference) => {
+    updatePreference(next);
+    try { localStorage.setItem('nabil-motion', next); } catch { /* Выбор работает и без сохранения. */ }
   }, []);
 
   useEffect(() => {
@@ -33,7 +41,7 @@ export function MotionProvider({ children }: { children: ReactNode }) {
     };
   }, [preference]);
 
-  const value = useMemo(() => ({ preference }), [preference]);
+  const value = useMemo(() => ({ preference, setPreference }), [preference, setPreference]);
   return <MotionContext.Provider value={value}>{children}</MotionContext.Provider>;
 }
 

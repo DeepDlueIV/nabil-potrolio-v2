@@ -41,4 +41,6 @@
 @media (max-width: 1000px) { .layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); } .stack { grid-template-columns: 1fr; gap: 1.4rem; } }
 @media (max-width: 700px) { .layout { grid-template-columns: 1fr; } .showcase { max-width: 32rem; width: 100%; } .stack { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; } }
 @media (max-width: 450px) { .stack { grid-template-columns: 1fr; } .caption { min-height: 14rem; } }
-@media (prefers-reduced-motion: reduce) { .layer { transition: none; } .progress span, .nodeIndicator, .caption { animation: none; } .path::after { display: none; } }
+:global(html[data-motion='reduced']) .layer { transition: none; }
+:global(html[data-motion='reduced']) .progress span, :global(html[data-motion='reduced']) .nodeIndicator, :global(html[data-motion='reduced']) .caption { animation: none; }
+:global(html[data-motion='reduced']) .path::after { display: none; }

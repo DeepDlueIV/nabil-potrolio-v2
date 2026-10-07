@@ -70,9 +70,10 @@ test('manual holds and contact workflow', async ({ page, context }) => {
   await expect(dialog.getByRole('status')).toHaveText('Brief copied. Nothing was sent.');
 });
 
-test('system reduced motion and manual rendering', async ({ page }) => {
+test('visitor can pause motion and use manual rendering', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/');
+  await page.getByRole('button', { name: 'Pause animations', exact: true }).click();
   await expect(page.locator('html')).toHaveAttribute('data-motion', 'reduced');
   await page.getByRole('tab', { name: 'Inside', exact: true }).click();
   await expect(page.locator('.rack-scene')).toHaveAttribute('data-phase', 'inside');

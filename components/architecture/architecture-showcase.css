@@ -71,4 +71,5 @@
   .architecture-flow-legend { justify-content: flex-start; gap: .5rem; font-size: .48rem; }
   .architecture-stage { min-height: 10rem; }
 }
-@media (prefers-reduced-motion: reduce) { .flow-node { transition: none; } .flow-edge > circle { animation: none; } }
+html[data-motion='reduced'] .flow-node { transition: none; }
+html[data-motion='reduced'] .flow-edge > circle { animation: none; }

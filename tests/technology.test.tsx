@@ -108,6 +108,7 @@ describe('technology purpose presentation', () => {
   });
 
   it('keeps all content readable and group selection available with reduced motion', () => {
+    localStorage.setItem('nabil-motion', 'reduced');
     vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }));
     render(<MotionProvider><TechnologyExplorer /></MotionProvider>);
     act(() => vi.advanceTimersByTime(20));
@@ -117,5 +118,6 @@ describe('technology purpose presentation', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Data & streaming' }));
     expect(within(show).getByRole('heading', { name: 'Apache Kafka' })).toBeInTheDocument();
     expect(screen.getByRole('region', { name: 'Complete technology stack' })).toHaveTextContent('TensorRT-LLM');
+    localStorage.removeItem('nabil-motion');
   });
 });
