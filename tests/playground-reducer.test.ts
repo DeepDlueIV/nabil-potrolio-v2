@@ -2,48 +2,44 @@ import { describe, expect, it } from 'vitest';
 import { architectureScenarios } from '../data/architecture-scenarios';
 import { createInitialPlaygroundState, getActiveRoute, playgroundReducer } from '../lib/architecture/playground-reducer';
 
-describe('playgroundReducer', () => {
-  it('resets incompatible state when the architecture scenario changes', () => {
-    const busyState = {
-      ...createInitialPlaygroundState('private-rag'),
-      selectedNodeId: 'inference-b',
-      loadMode: 'burst' as const,
-      unavailableWorkerId: 'inference-a',
-      demoStatus: 'running' as const,
-    };
-
-    expect(playgroundReducer(busyState, { type: 'select-scenario', scenarioId: 'streaming-data' })).toEqual({
-      scenarioId: 'streaming-data', selectedNodeId: 'producers', loadMode: 'normal', unavailableWorkerId: null, demoStatus: 'idle',
-    });
-  });
-
-  it('changes packet density without changing the logical route', () => {
+describe('architecture routes', () => {
+  it('starts with available inference and restores it after failure', () => {
     const initial = createInitialPlaygroundState('private-rag');
-    const burst = playgroundReducer(initial, { type: 'set-load', loadMode: 'burst' });
-    expect(burst.loadMode).toBe('burst');
-    expect(getActiveRoute(initial)).toEqual(getActiveRoute(burst));
-  });
-
-  it('reroutes around an unavailable worker when redundancy exists', () => {
-    const initial = playgroundReducer(createInitialPlaygroundState('private-rag'), { type: 'run-demo' });
+    expect(initial.demoStatus).toBe('running');
     const failed = playgroundReducer(initial, { type: 'pause-worker', workerId: 'inference-a' });
     expect(failed.demoStatus).toBe('rerouted');
-    expect(getActiveRoute(failed)).toEqual(['app', 'gateway', 'retrieval', 'vector-store', 'inference-b', 'app']);
+    expect(getActiveRoute(failed)).toContain('inference-b');
+    const restored = playgroundReducer(failed, { type: 'pause-worker', workerId: 'inference-a' });
+    expect(restored.demoStatus).toBe('running');
+    expect(getActiveRoute(restored)).toContain('inference-a');
   });
 
-  it('queues work instead of inventing a route when the only worker is paused', () => {
-    const initial = playgroundReducer(createInitialPlaygroundState('secure-ai'), { type: 'run-demo' });
+  it('has a real drawn edge for every online route hop', () => {
+    for (const scenario of architectureScenarios) {
+      for (const route of [scenario.normalRoute, scenario.fallbackRoute]) {
+        for (let index = 0; index < route.length - 1; index++) {
+          expect(scenario.edges.some((edge) => edge.from === route[index] && edge.to === route[index + 1] && edge.kind === 'data')).toBe(true);
+        }
+        expect(route).not.toContain('ingestion');
+        expect(route).not.toContain('provisioning');
+      }
+    }
+  });
+
+  it('queues at the policy boundary when secure inference is unavailable', () => {
+    const initial = createInitialPlaygroundState('secure-ai');
     const failed = playgroundReducer(initial, { type: 'pause-worker', workerId: 'private-inference' });
     expect(failed.demoStatus).toBe('queued');
-    expect(getActiveRoute(failed)).toEqual([]);
+    expect(getActiveRoute(failed)).toEqual(['enterprise-user', 'identity', 'policy']);
   });
 
-  it('reset restores the current scenario configuration', () => {
-    const scenario = architectureScenarios[1];
-    const changed = playgroundReducer(
-      { ...createInitialPlaygroundState(scenario.id), selectedNodeId: 'worker-b', loadMode: 'burst', demoStatus: 'complete' },
-      { type: 'reset' },
-    );
-    expect(changed).toEqual(createInitialPlaygroundState('streaming-data'));
+  it('resets incompatible state on scenario selection and preserves routing under burst', () => {
+    const initial = createInitialPlaygroundState();
+    const burst = playgroundReducer(initial, { type: 'set-load', loadMode: 'burst' });
+    expect(getActiveRoute(burst)).toEqual(getActiveRoute(initial));
+    const changed = playgroundReducer(burst, { type: 'select-scenario', scenarioId: 'streaming-data' });
+    expect(changed.loadMode).toBe('normal');
+    expect(changed.demoStatus).toBe('running');
+    expect(changed.unavailableWorkerId).toBeNull();
   });
 });

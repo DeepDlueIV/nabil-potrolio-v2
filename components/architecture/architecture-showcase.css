@@ -1,0 +1,57 @@
+.architecture-showcase .architecture-overview { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 2rem; margin-bottom: 3rem; }
+.architecture-overview article { border-top: 1px solid var(--line); padding-top: 1rem; }
+.architecture-overview h3 { font-size: 1.25rem; margin: .7rem 0; font-weight: 550; }
+.architecture-overview article > p:last-child { color: var(--muted); font-size: .95rem; line-height: 1.65; }
+.architecture-presentation { position: relative; border-top: 1px solid var(--line); }
+.architecture-showcase .scenario-tabs { margin: 0; display: flex; gap: .5rem; padding-block: 1rem; flex-wrap: wrap; border: 0; }
+.architecture-showcase .scenario-tabs button { padding: .85rem 1rem; font-size: .9rem; min-height: 44px; border: 1px solid var(--line); background: #0c1219; color: var(--muted); cursor: pointer; text-align: left; }
+.architecture-showcase .scenario-tabs button span { display: inline; margin-right: .65rem; font-family: var(--font-plex-mono), monospace; font-size: .72rem; color: #8398a9; }
+.architecture-showcase .scenario-tabs button[aria-selected='true'] { border-color: #54949e; background: #112a32; color: var(--ink); box-shadow: none; }
+.architecture-stage { display: grid; grid-template-columns: 1fr 1fr; align-items: center; gap: 2rem; padding: 1.5rem 0; min-height: 9.5rem; }
+.architecture-stage .technical-label { color: var(--cyan); font-size: .68rem; }
+.architecture-stage h3 { margin: .75rem 0 0; font-size: clamp(1.65rem,3vw,2.5rem); font-weight: 500; letter-spacing: -.04em; }
+.architecture-stage > p { color: var(--muted); font-size: 1rem; line-height: 1.65; margin: 0; }
+.architecture-flow { border-radius: 4px; background: radial-gradient(ellipse at 55% 40%, #14313977, transparent 65%), #080d12; padding: 1rem; }
+.architecture-flow svg { width: 100%; height: auto; display: block; overflow: visible; touch-action: pan-y; }
+.architecture-flow .architecture-flow__mobile { display: none; }
+.flow-edge { color: #344857; }
+.flow-edge > path { fill: none; stroke: currentColor; stroke-width: 1.5; }
+.flow-edge--control, .flow-edge--observability, .flow-edge--ingestion { stroke-dasharray: 5 7; opacity: .7; }
+.flow-edge--control { color: #98875f; }
+.flow-edge--observability { color: #8a78ad; }
+.flow-edge--ingestion { color: #668d82; }
+.flow-edge.is-active { color: var(--cyan); }
+.flow-edge.is-return { color: #baabed; }
+.flow-edge > circle { fill: currentColor; offset-distance: 0%; opacity: 0; animation: architecture-packet 3.2s linear infinite; }
+.architecture-flow[data-running='false'] .flow-edge > circle { animation-play-state: paused; }
+.flow-node { display: flex; flex-direction: column; justify-content: center; min-height: 62px; background: #0c141e; border: 1px solid #3a4c58; border-radius: 3px; padding: 8px 10px; color: #acbac7; transition: background .45s, border-color .45s, color .45s; }
+.flow-node > span { font-size: 16px; line-height: 1.2; font-weight: 600; }
+.flow-node > small { margin-top: 5px; font-size: 11px; line-height: 1.2; color: #8398a9; text-transform: uppercase; letter-spacing: .05em; }
+.flow-node.is-active { border-color: #54949e; background: #112a32; color: var(--ink); }
+.flow-node.is-key { border-color: var(--cyan); }
+.flow-node.is-supporting { border-style: dashed; background: #10131c; }
+.flow-node.is-unavailable { background: #281c12; border-color: var(--amber); color: var(--amber); }
+.architecture-flow-legend { display: flex; justify-content: center; flex-wrap: wrap; gap: .65rem 1.5rem; color: #9aacb9; font-size: .75rem; padding: 1rem 0 .25rem; }
+.architecture-flow-legend span::before { content: ''; display: inline-block; vertical-align: middle; width: 1.3rem; margin-right: .5rem; border-top: 2px solid var(--cyan); }
+.architecture-flow-legend span:nth-child(2)::before { border-color: #baabed; }
+.architecture-flow-legend span:nth-child(3)::before { border-top: 2px dashed #8a78ad; }
+.architecture-progress { height: 2px; background: #1d303c; overflow: hidden; }
+.architecture-progress > span { display: block; height: 100%; background: var(--cyan); transform-origin: left; animation: architecture-progress linear both; }
+.architecture-caption { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; align-items: center; min-height: 4rem; }
+.architecture-caption p { color: #8fa0ae; font-size: .8rem; }
+.architecture-caption button { color: var(--cyan); background: none; border: 0; text-decoration: underline; text-underline-offset: .25rem; min-height: 44px; cursor: pointer; }
+@keyframes architecture-packet { 0%,5% { offset-distance: 0%; opacity: 0; } 10% { opacity: 1; } 52% { offset-distance: 100%; opacity: 1; } 57%,100% { offset-distance: 100%; opacity: 0; } }
+@keyframes architecture-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (max-width: 700px) {
+  .architecture-showcase .architecture-overview { grid-template-columns: 1fr; gap: 1rem; margin-bottom: 2rem; }
+  .architecture-stage { grid-template-columns: 1fr; gap: .75rem; min-height: 12rem; }
+  .architecture-showcase .scenario-tabs { flex-direction: column; align-items: stretch; }
+  .architecture-showcase .scenario-tabs button { text-align: left; font-size: .9rem; }
+  .architecture-flow { padding: .75rem 0; }
+  .architecture-flow .architecture-flow__desktop { display: none; }
+  .architecture-flow .architecture-flow__mobile { display: block; }
+  .flow-node > span { font-size: 15px; }
+  .flow-node > small { font-size: 11px; }
+  .architecture-flow-legend { justify-content: flex-start; padding-inline: .75rem; font-size: .8rem; }
+}
+@media (prefers-reduced-motion: reduce) { .flow-node { transition: none; } .flow-edge > circle { animation: none; } .architecture-progress > span { animation: none; transform: scaleX(1); } }

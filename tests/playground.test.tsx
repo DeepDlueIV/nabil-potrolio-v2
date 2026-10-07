@@ -1,68 +1,81 @@
-import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ArchitecturePlayground } from '../components/architecture/ArchitecturePlayground';
 
-describe('ArchitecturePlayground', () => {
-  it('changes the architecture, nodes, boundary, and explanation with the selected scenario', async () => {
-    const user = userEvent.setup();
-    render(<ArchitecturePlayground />);
+const diagram = () => screen.getByTestId('architecture-diagram');
+const advance = () => act(() => { vi.advanceTimersByTime(3200); });
 
-    expect(screen.getByRole('button', { name: /inspect vector store/i })).toBeVisible();
-    await user.click(screen.getByRole('tab', { name: 'Streaming Data Platform' }));
-    expect(screen.getByText('Data platform boundary')).toBeVisible();
-    expect(screen.getByRole('button', { name: /inspect kafka/i })).toBeVisible();
-    expect(screen.queryByRole('button', { name: /inspect vector store/i })).not.toBeInTheDocument();
+describe('Architecture presentation', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it('starts healthy and completes five stages before changing scenarios', () => {
+    render(<ArchitecturePlayground />);
+    expect(diagram()).toHaveAttribute('data-status', 'running');
+    advance();
+    expect(screen.getByText('Context retrieval')).toBeVisible();
+    advance();
+    expect(diagram()).toHaveAttribute('data-load', 'burst');
+    advance();
+    expect(diagram()).toHaveAttribute('data-status', 'rerouted');
+    expect(diagram()).toHaveAttribute('data-route', 'app>gateway>retrieval>vector-store>retrieval>inference-b>gateway>app');
+    advance();
+    expect(diagram()).toHaveAttribute('data-status', 'running');
+    expect(screen.getByRole('tab', { name: 'Private LLM / RAG' })).toHaveAttribute('aria-selected', 'true');
+    advance();
+    expect(screen.getByRole('tab', { name: 'Streaming Data Platform' })).toHaveAttribute('aria-selected', 'true');
   });
 
-  it('shows useful node context outside the diagram', async () => {
-    const user = userEvent.setup();
+  it('holds a manual scenario near a transition until explicit continuation', () => {
     render(<ArchitecturePlayground />);
-
-    await user.click(screen.getByRole('button', { name: /inspect vector store/i }));
-    expect(screen.getByRole('status', { name: /selected architecture node/i })).toHaveTextContent(/searchable embeddings/i);
-    expect(screen.getByText(/Qdrant · Milvus/)).toBeVisible();
+    act(() => { vi.advanceTimersByTime(3199); });
+    fireEvent.click(screen.getByRole('tab', { name: 'Secure Enterprise AI' }));
+    act(() => { vi.advanceTimersByTime(40000); });
+    expect(diagram()).toHaveAttribute('data-route', 'enterprise-user>identity>policy>private-inference>response');
+    fireEvent.click(screen.getByRole('button', { name: 'Continue presentation' }));
+    advance(); advance(); advance();
+    expect(diagram()).toHaveAttribute('data-status', 'queued');
+    expect(diagram()).toHaveAttribute('data-route', 'enterprise-user>identity>policy');
+    advance();
+    expect(diagram()).toHaveAttribute('data-status', 'running');
   });
 
-  it('runs a burst flow, reroutes around a paused worker, and resets deterministically', async () => {
-    const user = userEvent.setup();
+  it('keeps all summaries readable without node controls or automatic announcements', () => {
     render(<ArchitecturePlayground />);
-
-    await user.click(screen.getByRole('button', { name: 'Burst' }));
-    await user.click(screen.getByRole('button', { name: 'Send demo request' }));
-    expect(screen.getByTestId('architecture-diagram')).toHaveAttribute('data-load', 'burst');
-    await user.click(screen.getByRole('button', { name: /pause inference a/i }));
-    expect(screen.getByRole('status', { name: /demo status/i })).toHaveTextContent(/rerouted through inference b/i);
-    expect(screen.getByTestId('architecture-diagram')).toHaveAttribute('data-route', 'app>gateway>retrieval>vector-store>inference-b>app');
-
-    await user.click(screen.getByRole('button', { name: 'Reset' }));
-    expect(screen.getByRole('button', { name: 'Normal' })).toHaveAttribute('aria-pressed', 'true');
-    expect(screen.getByRole('status', { name: /demo status/i })).toHaveTextContent(/ready/i);
+    expect(screen.getByRole('heading', { name: 'Private LLM / RAG' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Streaming Data Platform' })).toBeVisible();
+    expect(screen.getByRole('heading', { name: 'Secure Enterprise AI' })).toBeVisible();
+    expect(screen.queryByRole('button', { name: /inspect/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Continue presentation' })).not.toBeInTheDocument();
   });
 
-  it('reports a queued request when the secure scenario single worker is paused', async () => {
-    const user = userEvent.setup();
+  it('supports keyboard selection while keeping focus and holding the chosen scenario', () => {
     render(<ArchitecturePlayground />);
-
-    await user.click(screen.getByRole('tab', { name: 'Secure Enterprise AI' }));
-    await user.click(screen.getByRole('button', { name: /pause private inference/i }));
-    await user.click(screen.getByRole('button', { name: 'Test controlled request' }));
-    expect(screen.getByRole('status', { name: /demo status/i })).toHaveTextContent(/queued until private inference is available/i);
-  });
-
-  it('supports keyboard scenario selection', async () => {
-    const user = userEvent.setup();
-    render(<ArchitecturePlayground />);
-
-    screen.getByRole('tab', { name: 'Private LLM / RAG' }).focus();
-    await user.keyboard('{ArrowRight}');
+    const first = screen.getByRole('tab', { name: 'Private LLM / RAG' });
+    act(() => first.focus());
+    fireEvent.keyDown(first, { key: 'ArrowRight' });
     const streaming = screen.getByRole('tab', { name: 'Streaming Data Platform' });
-    expect(streaming).toHaveAttribute('aria-selected', 'true');
     expect(streaming).toHaveFocus();
+    act(() => { vi.advanceTimersByTime(40000); });
+    expect(streaming).toHaveAttribute('aria-selected', 'true');
+  });
 
-    await user.keyboard('{ArrowRight}');
-    const secure = screen.getByRole('tab', { name: 'Secure Enterprise AI' });
-    expect(secure).toHaveAttribute('aria-selected', 'true');
-    expect(secure).toHaveFocus();
+  it('does not move focus during automatic transitions', () => {
+    render(<ArchitecturePlayground />);
+    const initialFocus = document.activeElement;
+    for (let index = 0; index < 5; index++) advance();
+    expect(document.activeElement).toBe(initialFocus);
+  });
+
+  it('returns keyboard focus to the selected scenario on continuation', () => {
+    render(<ArchitecturePlayground />);
+    fireEvent.click(screen.getByRole('tab', { name: 'Streaming Data Platform' }));
+    const resume = screen.getByRole('button', { name: 'Continue presentation' });
+    act(() => resume.focus());
+    fireEvent.click(resume);
+    expect(screen.getByRole('tab', { name: 'Streaming Data Platform' })).toHaveFocus();
+    advance();
+    expect(screen.getByText('Stream processing')).toBeVisible();
   });
 });
