@@ -17,27 +17,54 @@ const durations = [8000, 8000, 8000, 8000];
 export function ExperienceShowcase() {
   const [near, setNear] = useState(false);
   const [readyStep, setReadyStep] = useState(-1);
-  const imageCache = useRef(new Map<number, Promise<boolean>>());
+  const [viewport, setViewport] = useState('initial');
+  const [display, setDisplay] = useState<{ index: number; src: string; previous: { index: number; src: string } | null } | null>(null);
+  const imageCache = useRef(new Map<string, Promise<boolean>>());
+  const decodedSources = useRef(new Map<string, string>());
   const container = useRef<HTMLDivElement | null>(null);
   const { ref: registerRef, step, held, progressKey, duration, running, select, resume, interactionProps } = usePresentation({ id: 'experience', durations, readyStep, pauseOnHover: true });
   const prepare = useCallback((index: number) => {
-    const cached = imageCache.current.get(index);
+    const candidateKey = `${viewport}:${index}`;
+    const cached = imageCache.current.get(candidateKey);
     if (cached) return cached;
     const request = new Promise<boolean>((resolve) => {
       const { props } = getImageProps({ src: images[index], alt: '', fill: true, sizes });
       const image = new window.Image();
-      image.onload = () => { void image.decode().then(() => resolve(true), () => resolve(false)); };
+      image.onload = () => { void image.decode().then(() => {
+        decodedSources.current.set(candidateKey, image.currentSrc || image.src);
+        resolve(true);
+      }, () => resolve(false)); };
       image.onerror = () => resolve(false);
       image.sizes = props.sizes ?? sizes;
       image.srcset = props.srcSet ?? '';
       image.src = props.src;
     });
-    imageCache.current.set(index, request);
+    imageCache.current.set(candidateKey, request);
     return request;
-  }, []);
-  const frame = useReadyFrame(step, prepare, near, setReadyStep);
+  }, [viewport]);
+  const commitReady = useCallback((index: number) => {
+    const src = decodedSources.current.get(`${viewport}:${index}`);
+    if (src) setDisplay((current) => ({ index, src, previous: current ? { index: current.index, src: current.src } : null }));
+    setReadyStep(index);
+  }, [viewport]);
+  const frame = useReadyFrame(step, prepare, near, commitReady);
   const role = profile.experience[frame.index];
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
+
+  useEffect(() => {
+    // Размер и DPR входят в ключ: готовность другого responsive-кандидата не подходит.
+    let previousViewport = '';
+    const update = () => {
+      const nextViewport = `${window.innerWidth}:${window.devicePixelRatio}`;
+      if (nextViewport === previousViewport) return;
+      previousViewport = nextViewport;
+      setReadyStep(-1);
+      setViewport(nextViewport);
+    };
+    const timer = setTimeout(update, 0);
+    window.addEventListener('resize', update);
+    return () => { clearTimeout(timer); window.removeEventListener('resize', update); };
+  }, []);
 
   useEffect(() => {
     const element = container.current;
@@ -71,11 +98,11 @@ export function ExperienceShowcase() {
 
   return <div ref={ref} className="experience-showcase" data-frame={frame.index} data-requested={step} data-ready={frame.ready} {...interactionProps}>
     <div className="experience-photograph">
-      {frame.previous !== null ? <Image className="experience-photo--previous" src={images[frame.previous]} alt="" fill sizes={sizes} aria-hidden="true" style={{ objectPosition: profile.experience[frame.previous].imagePosition }} /> : null}
+      {!frame.failed && display?.previous ? <Image className="experience-photo--previous" src={display.previous.src} unoptimized alt="" fill aria-hidden="true" style={{ objectPosition: profile.experience[display.previous.index].imagePosition }} /> : null}
       {frame.failed ? <div className="experience-photo-fallback"><span>{role.domain}</span><p>Systems, from software to infrastructure.</p></div> : <Image
-        key={frame.index} className={frame.ready ? 'experience-photo--current' : ''}
-        src={images[frame.index]} alt={role.imageAlt} fill sizes={sizes}
-        placeholder={typeof images[frame.index] === 'string' ? 'empty' : 'blur'} style={{ objectPosition: role.imagePosition }} />}
+        key={display?.src ?? 'initial'} className={frame.ready ? 'experience-photo--current' : ''}
+        src={display?.src ?? images[frame.index]} unoptimized={!!display} alt={role.imageAlt} fill sizes={sizes}
+        placeholder={!display && typeof images[frame.index] !== 'string' ? 'blur' : 'empty'} style={{ objectPosition: role.imagePosition }} />}
       <p className="experience-photo-caption">Editorial infrastructure imagery</p>
     </div>
     <div className="experience-frame-copy">
@@ -88,7 +115,7 @@ export function ExperienceShowcase() {
           onClick={() => select(index)} onKeyDown={(event) => key(event, index)}>{String(index + 1).padStart(2, '0')}</button>)}
       </div>
       <div className="presentation-progress" aria-hidden="true"><span key={progressKey} style={{ animationDuration: `${duration}ms`, animationPlayState: running ? 'running' : 'paused' }} /></div>
-      {held ? <button className="presentation-continue" type="button" onClick={resume}>Continue presentation <span aria-hidden="true">→</span></button> : null}
+      <div className="experience-continuation">{held ? <button className="presentation-continue" type="button" onClick={() => { buttons.current[step]?.focus({ preventScroll: true }); resume(); }}>Continue presentation <span aria-hidden="true">→</span></button> : null}</div>
     </div>
   </div>;
 }

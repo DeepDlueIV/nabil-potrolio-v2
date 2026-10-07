@@ -50,7 +50,7 @@ export function HeroNarrative({ phase, held, running, duration, progressKey, onS
       </div>
       <p id="hero-phase-description" role="tabpanel" aria-labelledby={`hero-tab-${selected}`} className="showcase-phase-copy">{phaseCopy[phase].body}</p>
       <div className="showcase-resume-slot">
-        {held && <button className="showcase-resume" type="button" onClick={onResume}>Continue presentation <span aria-hidden="true">→</span></button>}
+        {held && <button className="showcase-resume" type="button" onClick={() => { tabs.current[phases.indexOf(selected)]?.focus({ preventScroll: true }); onResume(); }}>Continue presentation <span aria-hidden="true">→</span></button>}
       </div>
     </div>
   );

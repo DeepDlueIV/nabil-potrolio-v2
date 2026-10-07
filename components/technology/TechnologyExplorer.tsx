@@ -1,6 +1,7 @@
 'use client';
 
 import type { CSSProperties } from 'react';
+import { useRef } from 'react';
 import { technologies } from '@/data/technologies';
 import { usePresentation } from '@/components/presentation/usePresentation';
 import styles from './TechnologyExplorer.module.css';
@@ -30,6 +31,7 @@ export function TechnologyExplorer() {
     usePresentation({ id: 'technology', durations, pauseOnHover: true });
   const frame = frames[step];
   const groupIndex = Math.floor(step / 2);
+  const controls = useRef<Array<HTMLButtonElement | null>>([]);
 
   return (
     <section id="technology" className="technology-section" aria-labelledby="technology-title">
@@ -62,11 +64,11 @@ export function TechnologyExplorer() {
           </div>
           <nav className={styles.navigation} aria-label="Technology presentation groups">
             {groups.map((group, index) => (
-              <button key={group.id} type="button" aria-pressed={index === groupIndex} onClick={() => select(index * 2)}>{group.label}</button>
+              <button key={group.id} ref={(node) => { controls.current[index] = node; }} type="button" aria-pressed={index === groupIndex} onClick={() => select(index * 2)}>{group.label}</button>
             ))}
           </nav>
           <div className={styles.continuation}>
-            {held && <button type="button" onClick={resume}>Continue presentation <span aria-hidden="true">→</span></button>}
+            {held && <button type="button" onClick={() => { controls.current[groupIndex]?.focus({ preventScroll: true }); resume(); }}>Continue presentation <span aria-hidden="true">→</span></button>}
           </div>
           <p className={styles.note}>Illustrative tool roles within a system.</p>
         </figure>
