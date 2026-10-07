@@ -8,10 +8,10 @@ import { About } from '@/components/about/About';
 import { ContactLinks, SourceGitHubLink } from '@/components/contact/ContactLinks';
 
 describe('open professional content', () => {
-  it('links to the website source without inventing a personal GitHub contact', () => {
+  it('links to GitHub home without inventing a personal GitHub contact', () => {
     render(<><SourceGitHubLink /><ContactLinks contacts={{ email: '', github: '', linkedin: '' }} /></>);
-    const source = screen.getByRole('link', { name: 'Source on GitHub' });
-    expect(source).toHaveAttribute('href', 'https://github.com/DeepDlueIV/nabil-potrolio-v2');
+    const source = screen.getByRole('link', { name: 'GitHub', exact: true });
+    expect(source).toHaveAttribute('href', 'https://github.com/');
     expect(source.querySelector('svg')).not.toBeNull();
     expect(screen.queryByRole('link', { name: 'GitHub profile' })).toBeNull();
   });
