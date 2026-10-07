@@ -21,29 +21,33 @@ describe('Hero presentation', () => {
     render(<Hero forceFallback />);
     expect(screen.getByRole('img', { name: /GPU server in a compact rack/i })).toBeVisible();
     expect(screen.getByRole('tab', { name: 'System' })).toHaveAttribute('aria-selected', 'true');
-    act(() => { vi.advanceTimersByTime(4000); });
+    act(() => { vi.advanceTimersByTime(1000); });
+    const progress = document.querySelector('.showcase-progress span') as HTMLElement;
+    expect(Number(progress.style.transform.slice(7, -1))).toBeCloseTo(.5, 1);
+    expect(screen.getByTestId('compute-poster')).toHaveAttribute('data-phase', 'system');
+    act(() => { vi.advanceTimersByTime(1000); });
     expect(screen.getByRole('tab', { name: 'Inside' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByTestId('compute-poster')).toHaveAttribute('data-phase', 'inside');
-    act(() => { vi.advanceTimersByTime(6000); });
+    act(() => { vi.advanceTimersByTime(3000); });
     expect(screen.getByRole('tab', { name: 'Data flow' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByText('Requests, context, inference, response.')).toBeVisible();
-    act(() => { vi.advanceTimersByTime(6000); });
+    act(() => { vi.advanceTimersByTime(3000); });
     expect(screen.getByRole('tab', { name: 'System' })).toHaveAttribute('aria-selected', 'true');
     expect(screen.getByTestId('compute-poster')).toHaveAttribute('data-phase', 'return');
-    act(() => { vi.advanceTimersByTime(4000); });
+    act(() => { vi.advanceTimersByTime(2000); });
     expect(screen.getByTestId('compute-poster')).toHaveAttribute('data-phase', 'system');
   });
 
   it('holds a manual phase even at a pending transition and resumes explicitly', () => {
     vi.useFakeTimers();
     render(<Hero forceFallback />);
-    act(() => { vi.advanceTimersByTime(3999); });
+    act(() => { vi.advanceTimersByTime(1999); });
     fireEvent.click(screen.getByRole('tab', { name: 'Inside' }));
     act(() => { vi.advanceTimersByTime(30000); });
     expect(screen.getByRole('tab', { name: 'Inside' })).toHaveAttribute('aria-selected', 'true');
     fireEvent.click(screen.getByRole('button', { name: 'Resume server presentation' }));
     expect(screen.getByRole('button', { name: 'Pause server presentation' })).toBeInTheDocument();
-    act(() => { vi.advanceTimersByTime(6000); });
+    act(() => { vi.advanceTimersByTime(3000); });
     expect(screen.getByRole('tab', { name: 'Data flow' })).toHaveAttribute('aria-selected', 'true');
   });
 
@@ -64,7 +68,7 @@ describe('Hero presentation', () => {
     vi.useFakeTimers();
     const { container } = render(<Hero forceFallback />);
     fireEvent.mouseEnter(screen.getByTestId('compute-scene'));
-    act(() => { vi.advanceTimersByTime(4000); });
+    act(() => { vi.advanceTimersByTime(2000); });
     expect(screen.getByRole('tab', { name: 'Inside' })).toHaveAttribute('aria-selected', 'true');
     expect(container.querySelector('[aria-live]')).toBeNull();
   });
@@ -72,14 +76,14 @@ describe('Hero presentation', () => {
   it('stops while the page is hidden and gives the current frame its full time after returning', () => {
     vi.useFakeTimers();
     render(<PresentationProvider><Hero forceFallback /></PresentationProvider>);
-    act(() => { vi.advanceTimersByTime(2500); });
+    act(() => { vi.advanceTimersByTime(1250); });
     Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'hidden' });
     fireEvent(document, new Event('visibilitychange'));
     act(() => { vi.advanceTimersByTime(30000); });
     expect(screen.getByRole('tab', { name: 'System' })).toHaveAttribute('aria-selected', 'true');
     Object.defineProperty(document, 'visibilityState', { configurable: true, value: 'visible' });
     fireEvent(document, new Event('visibilitychange'));
-    act(() => { vi.advanceTimersByTime(3999); });
+    act(() => { vi.advanceTimersByTime(1999); });
     expect(screen.getByRole('tab', { name: 'System' })).toHaveAttribute('aria-selected', 'true');
     act(() => { vi.advanceTimersByTime(1); });
     expect(screen.getByRole('tab', { name: 'Inside' })).toHaveAttribute('aria-selected', 'true');

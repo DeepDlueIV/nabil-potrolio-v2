@@ -4,7 +4,7 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import * as THREE from 'three';
 import type { ComputeSceneProps } from './ComputeScene';
-import { requestRoute } from './compute-model';
+import { heroPlaybackRate, requestRoute } from './compute-model';
 
 type ComputeCanvasProps = Omit<ComputeSceneProps, 'forceFallback'> & { onContextLost: () => void; onReady: () => void };
 type V3 = [number, number, number];
@@ -42,7 +42,7 @@ const fanVents = [-1.5, -.5, .5, 1.5].flatMap((x) => Array.from({ length: 9 }, (
 const railHoles = [-2.16, 2.16].flatMap((x) => Array.from({ length: 14 }, (_, i) => ({ position: [x, -1.8 + i * .28, 1.74] as V3, size: [.08, .11, .015] as V3 })));
 const safeCurvePoint = (curve: THREE.CatmullRomCurve3, progress: number) => curve.getPointAt(THREE.MathUtils.clamp(progress, 0, .999));
 
-function RackModel({ phase, active, reduced, pointer }: Omit<ComputeCanvasProps, 'onContextLost' | 'onReady'> & { pointer: React.RefObject<{ x: number; y: number }> }) {
+function RackModel({ phase, active, running, phaseProgress, reduced, pointer }: Omit<ComputeCanvasProps, 'onContextLost' | 'onReady'> & { pointer: React.RefObject<{ x: number; y: number }> }) {
   const root = useRef<THREE.Group>(null);
   const drawer = useRef<THREE.Group>(null);
   const signal = useRef<THREE.Mesh>(null);
@@ -70,13 +70,16 @@ function RackModel({ phase, active, reduced, pointer }: Omit<ComputeCanvasProps,
     if (!active || reduced) return;
     delta = Math.min(delta, .05);
     if (start.current === null) start.current = state.clock.elapsedTime;
-    if (drawer.current) drawer.current.position.z = THREE.MathUtils.damp(drawer.current.position.z, target, 4.5, delta);
+    if (drawer.current) drawer.current.position.z = THREE.MathUtils.damp(drawer.current.position.z, target, 4.5 * heroPlaybackRate, delta);
     if (root.current) {
       root.current.rotation.y = THREE.MathUtils.damp(root.current.rotation.y, pointer.current.x * .1, 5, delta);
       root.current.rotation.x = THREE.MathUtils.damp(root.current.rotation.x, pointer.current.y * .055, 5, delta);
     }
     if (signal.current) {
-      const elapsed = state.clock.elapsedTime - start.current;
+      // Автоматический сигнал использует тот же прогресс, что полоса под сценой.
+      const elapsed = running && phaseProgress !== undefined
+        ? phaseProgress * (phase === 'system' || phase === 'return' ? 4 : 6)
+        : (state.clock.elapsedTime - start.current) * heroPlaybackRate;
       if (phase === 'system') signal.current.position.copy(safeCurvePoint(entry, (elapsed % 4) / 3));
       else if (phase === 'flow') {
         const progress = elapsed % 6;

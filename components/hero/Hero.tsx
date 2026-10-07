@@ -32,6 +32,7 @@ export function Hero({ forceFallback = false }: { forceFallback?: boolean }) {
           <ComputeScene
             phase={phase}
             running={running}
+            phaseProgress={progress}
             active={active && pageVisible}
             reduced={reduced}
             forceFallback={forceFallback}

@@ -1,6 +1,7 @@
 export type ScenePhase = 'system' | 'inside' | 'flow' | 'return';
 
-export const heroDurations = [4000, 6000, 6000, 4000] as const;
+export const heroPlaybackRate = 2;
+export const heroDurations = [4000, 6000, 6000, 4000].map(duration => duration / heroPlaybackRate);
 export const heroPhases: ScenePhase[] = ['system', 'inside', 'flow', 'return'];
 export const phaseCopy: Record<ScenePhase, { title: string; body: string }> = {
   system: { title: 'System', body: 'Private AI infrastructure.' },

@@ -2,15 +2,17 @@
 
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
-import { Component, useCallback, useEffect, useState, type ReactNode } from 'react';
+import { Component, useCallback, useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { ComputePoster } from './ComputePoster';
 import type { ScenePhase } from './compute-model';
+import { heroPlaybackRate } from './compute-model';
 
 const ComputeCanvas = dynamic(() => import('./ComputeCanvas').then((module) => module.ComputeCanvas), { ssr: false });
 
 export type ComputeSceneProps = {
   phase: ScenePhase;
   running: boolean;
+  phaseProgress?: number;
   active: boolean;
   reduced: boolean;
   forceFallback?: boolean;
@@ -53,7 +55,7 @@ export function ComputeScene(props: ComputeSceneProps) {
 
   const inside = props.phase === 'inside' || props.phase === 'flow';
   return (
-    <div className="rack-scene" data-webgl={webgl && ready ? 'active' : 'fallback'} data-phase={props.phase} data-running={props.running} data-active={props.active} data-reduced={props.reduced} data-testid="compute-scene">
+    <div className="rack-scene" style={{ '--hero-playback-rate': heroPlaybackRate } as CSSProperties} data-webgl={webgl && ready ? 'active' : 'fallback'} data-phase={props.phase} data-running={props.running} data-active={props.active} data-reduced={props.reduced} data-testid="compute-scene">
       {checked && !webgl || props.forceFallback
         ? <ComputePoster phase={props.phase} running={props.running} reduced={props.reduced} />
         : !ready && <Image className="hardware-poster" data-testid="compute-poster" src="/images/compute-rack-poster.png" alt="GPU server in a compact rack, ready for the presentation" fill unoptimized />}

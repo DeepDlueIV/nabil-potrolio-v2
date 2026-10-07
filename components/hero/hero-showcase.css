@@ -19,9 +19,9 @@
 .rack-scene { position: relative; width: 100%; aspect-ratio: 1.12; touch-action: pan-y; }
 .hardware-poster { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; margin: 0; }
 .hardware-poster svg { width: 100%; height: 100%; overflow: visible; }
-.hardware-tray { transition: transform .8s cubic-bezier(.22,.7,.3,1); }
-.hardware-flow { stroke-dasharray: 10 800; animation: hardware-signal 6s linear infinite; }
-.hardware-entry { animation-duration: 4s; stroke-dasharray: 10 220; }
+.hardware-tray { transition: transform calc(.8s / var(--hero-playback-rate, 1)) cubic-bezier(.22,.7,.3,1); }
+.hardware-flow { stroke-dasharray: 10 800; animation: hardware-signal calc(6s / var(--hero-playback-rate, 1)) linear infinite; }
+.hardware-entry { animation-duration: calc(4s / var(--hero-playback-rate, 1)); stroke-dasharray: 10 220; }
 .rack-scene[data-running='false'] .hardware-flow { animation-play-state: paused; }
 .rack-scene[data-reduced='true'] .hardware-flow { animation: none; stroke-dasharray: none; opacity: .65; }
 .rack-scene[data-reduced='true'] .hardware-tray { transition: none; }
