@@ -1,12 +1,12 @@
 import { expertise } from '@/data/profile';
+import Image from 'next/image';
 
-function ExpertiseGlyph({ kind }: { kind: string }) {
-  return (
-    <div className={`expertise-glyph expertise-glyph--${kind}`} aria-hidden="true">
-      <span /><span /><span /><span />
-    </div>
-  );
-}
+const illustrations: Record<string, string> = {
+  compute: '01-gpu-orchestration.png',
+  pipeline: '02-data-pipelines-vector-systems.png',
+  boundary: '03-cloud-zero-trust-security.png',
+  direction: '04-technical-leadership.png',
+};
 
 export function Expertise() {
   return (
@@ -20,7 +20,7 @@ export function Expertise() {
         {expertise.map((area, index) => (
           <article className="expertise-row" key={area.id}>
             <p className="expertise-index technical-label">0{index + 1}</p>
-            <ExpertiseGlyph kind={area.diagram} />
+            <Image className="expertise-illustration" src={`/images/services/${illustrations[area.diagram]}`} alt="" width={1448} height={1086} sizes="(max-width: 720px) calc(100vw - 120px), 25vw" />
             <div className="expertise-copy">
               <h3>{area.title}</h3>
               <dl>

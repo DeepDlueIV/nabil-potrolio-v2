@@ -13,6 +13,10 @@ The four experience images were generated for this portfolio with OpenAI ImageGe
 | `public/images/experience-systems.webp` | Senior infrastructure engineer | Photorealistic open high-performance compute racks in an industrial machine room, no people, brands, text, or client identity. |
 | `public/images/experience-hardware.webp` | Full-stack systems engineer | Photorealistic macro motherboard and processor socket, charcoal PCB and subtle cyan light, no brands, text, or employer identity. |
 
+## Service illustrations
+
+Четыре иллюстрации предоставлены владельцем 2026-10-07 и скопированы без изменения в `public/images/services/`: `01-gpu-orchestration.png`, `02-data-pipelines-vector-systems.png`, `03-cloud-zero-trust-security.png`, `04-technical-leadership.png`. Они заменяют геометрические заглушки соответствующих услуг. Next.js создаёт адаптивные версии при выдаче; пропорции и содержание оригиналов сохранены. Светлый фон объединён с фоном секции обратимым CSS `mix-blend-mode: darken`.
+
 ## Code-native assets
 
 - `public/images/nabil-portrait.webp`: supplied by the user on 2026-10-07, converted from the provided GPU-rig portrait to a 1000 × 1250 WebP (quality 85, 141,578 bytes). Metadata was stripped; the face and background were not regenerated. Cool/dark integration is reversible CSS only. The original remains in the user's Downloads and an ignored `output/originals/` copy, never shipped from `public/`.
