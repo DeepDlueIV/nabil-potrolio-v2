@@ -35,12 +35,14 @@ export const technologies: TechnologyGroup[] = [
     { name: 'Hetzner', purpose: 'Bare-metal infrastructure option', layers: ['provisioning'] },
     { name: 'OVH', purpose: 'Bare-metal infrastructure option', layers: ['provisioning'] },
   ] },
-  { id: 'security', label: 'Security / Observability', description: 'Identity, secrets, evidence, and audit context.', items: [
+  { id: 'security', label: 'Security / Observability', description: 'Identity, secrets, and operational evidence.', items: [
     { name: 'Vault', purpose: 'Secrets management', layers: ['identity'] },
     { name: 'OpenID Connect', purpose: 'Identity federation', layers: ['identity'] },
     { name: 'Prometheus', purpose: 'Metrics collection', layers: ['observability'] },
     { name: 'Grafana', purpose: 'Operational observability', layers: ['observability'] },
     { name: 'ELK Stack', purpose: 'Centralized logs and analysis', layers: ['observability'] },
+  ] },
+  { id: 'standards', label: 'Standards / Audit Context', description: 'Security and privacy frameworks; not personal certifications.', items: [
     { name: 'SOC 2', purpose: 'Audit-readiness context, not a claimed certification', layers: ['observability'] },
     { name: 'ISO 27001', purpose: 'Security-management audit context', layers: ['observability'] },
     { name: 'GDPR', purpose: 'Privacy and data-sovereignty context', layers: ['identity', 'observability'] },
