@@ -1,11 +1,8 @@
 import type { ContactDetails } from '@/data/types';
 import styles from './ContactLinks.module.css';
 
-// Ссылка на исходники не является личным профилем Nabil.
-const sourceRepository = 'https://github.com/DeepDlueIV/nabil-potrolio-v2';
-
 export function SourceGitHubLink() {
-  return <a className={styles.source} href={sourceRepository} target="_blank" rel="noopener noreferrer"><GitHubIcon />Source on GitHub</a>;
+  return <a className={styles.source} href="https://github.com/" target="_blank" rel="noopener noreferrer"><GitHubIcon />GitHub</a>;
 }
 
 function GitHubIcon() {
