@@ -25,6 +25,14 @@ npm run check
 
 `npm run test:e2e` exercises the production build. Run `npm run build` first, or use `npm run check` for the complete sequence.
 
+Production-browser tests use port **3100**, isolated from a local development server. The suite records automatic presentations and saves screenshots and diagnostics in ignored `output/playwright/`.
+
+## Automatic presentation
+
+Native scrolling is never intercepted. Hero, architecture, experience and tools share viewport-aware timer ownership. Manual selection and keyboard focus hold a presentation until Continue presentation; hover temporarily pauses photos and tools. Hidden tabs and offscreen scenes do not catch up missed steps. System `prefers-reduced-motion` disables automatic cycling without hiding content.
+
+About follows the hero; all four career records and all six technology groups stay open. Photographs commit only after decoding the actual responsive candidate. A resize prepares the appropriate candidate while retaining the current image and caption. Failed loads use a bounded textual fallback.
+
 ## Edit the profile
 
 Edit `data/profile.ts`. Contact values intentionally start empty:
@@ -38,6 +46,8 @@ contacts: {
 ```
 
 Use a plain email address and full `https://` social URLs. Experience, expertise, services, and languages live in `data/profile.ts`. Technologies and architecture illustrations have their own typed data modules in `data/`.
+
+Set `profile.contacts.github` to show the real GitHub icon/link; an empty string renders nothing. Replace `public/images/nabil-portrait.webp` and update `profile.portrait.src`, `alt` and `objectPosition` for a new portrait. Set `profile.portrait` to `null` to remove the photograph without an empty slot. Keep full-resolution originals outside `public/`.
 
 The visible career span is intentionally fixed at **7 years / 2019 — Present**. The four role ranges are `2021 — Present`, `2021 — 2024`, `2020 — 2021`, and `2019 — 2020`; update the data tests with any future verified change.
 

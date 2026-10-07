@@ -15,6 +15,9 @@ The four experience images were generated for this portfolio with OpenAI ImageGe
 
 ## Code-native assets
 
+- `public/images/nabil-portrait.webp`: supplied by the user on 2026-10-07, converted from the provided GPU-rig portrait to a 1000 × 1250 WebP (quality 85, 141,578 bytes). Metadata was stripped; the face and background were not regenerated. Cool/dark integration is reversible CSS only. The original remains in the user's Downloads and an ignored `output/originals/` copy, never shipped from `public/`.
+- Hero rack: original geometry and SVG, using NVIDIA hardware documentation only as a form reference. No external photograph, model, logo or product endorsement is shipped. See `docs/hero-hardware-references.md`.
+
 - `app/icon.svg`: original geometric monogram created for this site.
 - `public/social-preview.svg`: original code-native social preview assembled from the site's typography and system diagram language.
 - Architecture and compute diagrams are rendered locally with HTML, SVG, CSS, and Three.js; they are illustrative and contain no client data.

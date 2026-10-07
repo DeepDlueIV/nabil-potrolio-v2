@@ -1,60 +1,97 @@
-# Portfolio V2 QA record
+# QA: автоматическое представление Portfolio V2
 
-Date: 2026-10-07
+Дата: 2026-10-07. Время записи отчёта: 10:29 UTC / 17:29 Asia/Novosibirsk.
+Среда: Windows, Node.js 22.23.2, Next.js 16.3.8, Playwright 1.63.0 / Chromium.
+Рабочая ветка: `codex/showcase-refinement`, исходная версия: `847f5cc`.
+Production и main не заменялись.
 
-Environment: Windows, Node.js 22.23.2, Chromium 153 (Playwright 1.63.0)
+## Выполненные проверки
 
-## Automated verification
+- `npm ci`: установлены зависимости существующего lockfile, новых зависимостей нет.
+- `npm run typecheck`, `npm run lint`: успешно, ноль предупреждений ESLint.
+- `npm test`: 48/48 тестов, 9 файлов.
+- `npm run build`: production-сборка и статический prerender успешны.
+- `npm run check`: полный gate пройден до добавления двух дополнительных browser-проверок; 6/6 активных E2E, один необязательный baseline пропущен.
+- Дополнительный production-прогон: 7/7 E2E без повторной длинной записи. Вместе проверены восемь разных browser-сценариев.
+- `npm audit --omit=dev`: 0 уязвимостей. При установке полный dev-tree сообщил 5 high advisories в транзитивном lint tooling; автоматический breaking update не выполнялся.
+- `git diff --check`: без ошибок whitespace.
 
-The complete local gate is:
+Production-тесты используют порт 3100, не существующий dev-server на 3000.
+Необязательный baseline обращается к историческому production и по умолчанию пропущен:
+`$env:CAPTURE_BASELINE='1'; npx playwright test tests/e2e/baseline-evidence.spec.ts`.
 
-```powershell
-npm ci
-npx playwright install chromium
-npm run check
-```
+## Матрица браузера
 
-`npm run check` runs, in order:
+Сохранены до/после: 1440×900, 1280×800, 768×1024, 390×844 и 360×800.
+На всех ширинах нет горизонтального переполнения. Дополнительно сохранены hero,
+About, архитектурная схема, опыт и полный стек. Desktop hero, портрет, мобильная
+схема, планшетный стек и кадры записи просмотрены визуально.
 
-1. TypeScript typecheck (`tsc --noEmit`).
-2. ESLint with zero warnings.
-3. Vitest component and reducer tests.
-4. Next.js production build and static prerender.
-5. Playwright against the production server.
+Проверены:
 
-The latest run passed **32/32 Vitest tests** and **2/2 Chromium end-to-end tests**. The browser suite asserts the seven-year claim, server-rendered identity, page-level overflow at 360, 390, 768, 1280, 1440, and 1920 px, architecture failure/reset behavior, role and image switching, technology-layer selection, full technology disclosure, explicit reduced motion, service prefill, contact validation, and the honest local-copy result.
+- первая прокрутка сразу перемещает страницу, hash-навигация и Back/Forward;
+- все четыре роли и 34 инструмента доступны без раскрытия и без JavaScript;
+- ручные состояния удерживаются; Continue возвращает фокус на стабильный контрол;
+- системный reduced motion сохраняет ручной доступ без автоматических циклов;
+- реальная потеря WebGL возвращает SVG, ручной Inside продолжает работать;
+- общий таймер: разные длительности, гонка ручного выбора у deadline, hover,
+  focus, hidden-page, offscreen, полный интервал после возврата и hysteresis;
+- RAG с контекстом до inference и обратным ответом; резервирование redundant
+  workers; очередь Secure AI без выдуманного резервного inference;
+- contact-dialog копирует локальный brief, ничего не отправляет.
 
-## Visual inspection
+## Диагностика фотографий
 
-Screenshots were inspected at:
+Причина старого поведения: описание переключалось сразу, Next Image монтировался
+с новым source до готовности его файла. В baseline после ручного выбора hardware:
+`currentSrc=""`, `complete=false`, `naturalWidth=0`; затем decode занял около
+32.8 ms в этом конкретном прогоне. Это наблюдение, не универсальная оценка сети.
 
-| Viewport | Focus |
-| --- | --- |
-| 1440 × 900 | Desktop hero, experience, technology, and contact composition |
-| 1280 × 800 | Desktop hero density and fixed header |
-| 768 × 1024 | Tablet hero split, scene controls, and narrative |
-| 390 × 844 | Mobile hero hierarchy, CTA reachability, experience timeline, and contact dialog |
-| 360 × 800 | Minimum-width page overflow |
-| 1920 × 1080 | Large-screen line length, max-width behavior, and composition |
+Новая версия под cache-disabled, latency 150 ms и download 200000 B/s:
+1440 → 390 px, ручной network-frame. Показанный `currentSrc` — responsive URL
+с `w=384&q=75`, naturalWidth=384, complete=true; повторный decode 0–0.1 ms.
+Готовность кешируется по viewport/DPR/кадру, а показ фиксируется на уже
+декодированном URL. Подпись и изображение меняются одной парой; время загрузки
+не входит в восьмисекундный показ. Ранее готовая пара остаётся до нового decode.
 
-The local QA images and Playwright traces live under ignored `output/playwright/` and are intentionally excluded from the source archive.
+Также проверен путь успешный кадр 0 → успешный 1 → отказ 2: виден текстовый
+fallback, старого слоя изображения нет. Timeout ограничен 6 s, stale promises
+не коммитятся. Рядом с секцией заранее готовится только следующий кадр.
 
-## Content and behavior checks
+## Артефакты и запись
 
-- Experience reads **7 years** and spans **2019 — Present**; no 11-year claim remains.
-- All three architecture scenarios are labeled as deterministic illustrations, not live systems or benchmarks.
-- Pausing a redundant worker reroutes; pausing the only secure-inference worker queues; Reset restores the initial state.
-- Core text and the SVG poster remain available if WebGL does not initialize.
-- WebGL context loss returns the hero to the code-native SVG poster.
-- Global Full/Reduced motion control and `prefers-reduced-motion` disable CSS, GSAP, Motion, and WebGL animation.
-- The architecture tabs move selection and focus with the arrow keys; the contact modal traps focus and restores it to its trigger.
-- Native disclosure elements retain the complete experience and technology records without client-side interaction.
-- Images are local, optimized WebP files and are disclosed as AI-generated editorial references, not client facilities.
-- No verified contact address was supplied. The contact form prepares and copies a brief locally and never reports a send.
+Всё находится в игнорируемом `output/playwright/`:
 
-## Dependency audit and limits
+- `showcase-before-*-full.png`, `showcase-after-*-*.png`;
+- `results.json`, `baseline-results.json`, failure-traces при ошибках;
+- `showcase-recordings/*.webm`: примерно 94 s hero → три архитектурных сценария
+  → смена фотографий;
+- `showcase-recording-hero.png`, `showcase-recording-architecture.png`,
+  `showcase-recording-experience.png`: просмотренные кадры записи.
 
-- `npm audit --omit=dev` reports no production dependency vulnerabilities at this snapshot.
-- The full development tree reports five high-severity advisories in transitive lint tooling. Applying the suggested forced audit fix would require breaking framework/toolchain changes, so it is not performed automatically.
-- WebGL rendering remains device-dependent; the code-native poster and full component descriptions are the supported fallback.
-- Deployment, domain configuration, analytics, and a public recipient email remain intentionally unconfigured.
+Запись 25 fps — свойство видеозахвата, не измерение производительности WebGL.
+Device FPS, работа на физических телефонах и все браузеры не измерялись.
+
+## Независимое ревью и журнал решений
+
+Время записи каждой строки журнала: 2026-10-07 10:29 UTC.
+
+| Действие | Причина | Результат | Следующий шаг |
+| --- | --- | --- | --- |
+| Сохранены baseline и отдельная ветка | Не потерять предыдущий проект | main и production сохранены | Проверить feature preview |
+| Заменены старые controls и sticky hero | Автоматическое представление вместо обязательных кликов | Native scroll, один владелец показа | Наблюдать реальные устройства |
+| Независимое read-only review | Проверить таймеры, изображения, фокус | Найдены focus/resize/fallback edge cases | Исправления внесены |
+| Зарезервировано место Continue | Focus появлялся между mousedown и click и сдвигал блок | Выбор кадра стабилен; E2E проходит | Сохранён regression-test |
+| Привязана готовность к decoded currentSrc | Кеш номера кадра не гарантирует новый responsive файл | Холодная смена размера проходит | Сохранён network-test |
+| Убран старый слой при fallback | Positioned image мог перекрывать fallback | Отказ загрузки безопасен | Сохранён failure-test |
+
+## Ограничения и конфигурация
+
+Фото опыта и схемы — иллюстрации, не клиентские объекты или live telemetry.
+Семь лет и четыре согласованных периода не изменены. GitHub/email/LinkedIn
+пока пустые: личные адреса не выдумывались. В `data/profile.ts` достаточно задать
+`contacts.github`; портрет настраивается через `portrait` или убирается `null`.
+Исходный portrait не опубликован из public, лицо не регенерировалось.
+
+Preview может требовать входа в Vercel. Production-публикация не выполняется
+без отдельного разрешения.

@@ -94,4 +94,32 @@ describe('presentation scheduling', () => {
     act(() => vi.advanceTimersByTime(1000));
     expect(screen.getByText('two:1:auto')).toBeInTheDocument();
   });
+
+  it('hover pauses temporarily but focus holds after pointer exit', () => {
+    render(<PresentationProvider><Demo /></PresentationProvider>);
+    visible('one');
+    fireEvent.mouseEnter(screen.getByTestId('one'));
+    act(() => vi.advanceTimersByTime(4000));
+    expect(screen.getByText('one:0:auto')).toBeInTheDocument();
+    fireEvent.mouseLeave(screen.getByTestId('one'));
+    act(() => vi.advanceTimersByTime(1000));
+    expect(screen.getByText('one:1:auto')).toBeInTheDocument();
+    fireEvent.focus(screen.getByText('Select one'));
+    fireEvent.mouseLeave(screen.getByTestId('one'));
+    act(() => vi.advanceTimersByTime(4000));
+    expect(screen.getByText('one:1:held')).toBeInTheDocument();
+  });
+
+  it('offscreen returns do not catch up missed steps', () => {
+    render(<PresentationProvider><Demo /></PresentationProvider>);
+    visible('one');
+    act(() => vi.advanceTimersByTime(999));
+    visible('one', 0);
+    act(() => vi.advanceTimersByTime(20000));
+    visible('one');
+    act(() => vi.advanceTimersByTime(999));
+    expect(screen.getByText('one:0:auto')).toBeInTheDocument();
+    act(() => vi.advanceTimersByTime(1));
+    expect(screen.getByText('one:1:auto')).toBeInTheDocument();
+  });
 });
