@@ -66,8 +66,9 @@ test('manual holds and contact workflow', async ({ page, context }) => {
   await dialog.getByLabel('Your name').fill('Ada Lovelace');
   await dialog.getByLabel('Reply email').fill('ada@example.com');
   await dialog.getByLabel('Task summary').fill('Review our private inference architecture.');
-  await dialog.getByRole('button', { name: 'Prepare brief' }).click();
-  await expect(dialog.getByRole('status')).toHaveText('Brief copied. Nothing was sent.');
+  await page.route('**/api/contact', (route) => route.fulfill({ json: { success: true } }));
+  await dialog.getByRole('button', { name: 'Send message' }).click();
+  await expect(dialog.getByRole('status')).toHaveText('Message sent. Thank you — Nabil will reply by email.');
 });
 
 test('visitor can pause motion and use manual rendering', async ({ page }) => {

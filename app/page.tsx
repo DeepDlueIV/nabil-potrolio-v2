@@ -8,7 +8,6 @@ import { TechnologyExplorer } from '@/components/technology/TechnologyExplorer';
 import { MotionProvider } from '@/components/ui/MotionProvider';
 import { SiteHeader } from '@/components/ui/SiteHeader';
 import { profile } from '@/data/profile';
-import { getContactAvailabilityCopy } from '@/lib/contact/brief';
 import { About } from '@/components/about/About';
 import { ContactLinks, SourceGitHubLink } from '@/components/contact/ContactLinks';
 import { PresentationProvider } from '@/components/presentation/PresentationProvider';
@@ -38,10 +37,10 @@ export default function HomePage() {
           </div>
           <div className="contact-callout">
             <p className="technical-label">Project brief</p>
-            <p>A structured local-first form helps turn the first message into useful technical context.</p>
+            <p>Describe your system or decision. Your message goes directly to Nabil’s inbox.</p>
             <ContactDialog triggerLabel="Prepare a project brief" />
             <ContactLinks contacts={profile.contacts} />
-            <small>{getContactAvailabilityCopy(profile.contacts.email).callout}</small>
+            <small>Sent to nabil.rakdani@codehaus.pro. Your email is used to reply to your enquiry.</small>
           </div>
         </section>
       </main>

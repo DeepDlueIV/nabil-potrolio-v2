@@ -66,7 +66,7 @@ The visible career span is intentionally fixed at **7 years / 2019 — Present**
 
 ## Contact behavior
 
-Until an email address is configured, the contact dialog prepares a project brief and copies it locally. Nothing is sent or stored. Once a verified email is configured, submitting opens a draft for the visitor to review and send.
+Форма отправляет сообщения через серверный `/api/contact` и Resend на `nabil.rakdani@codehaus.pro`. Отправитель: `website@notify.codehaus.pro`, адрес посетителя — Reply-To. В Vercel Production необходим секрет `RESEND_API_KEY` с правом отправки для подтверждённого `notify.codehaus.pro`. Ключ не нужен для сборки и не попадает в браузер. Mailto остаётся запасным вариантом; успешный ответ означает принятие письма сервисом, не гарантирует попадание во входящие. Добавлены проверка полей, ограничение размера, same-origin проверка и скрытое поле против простых ботов; это не полноценный rate limiter.
 
 Professional claims come from the supplied profile legend. Generic employers remain generic; illustrative images and diagrams do not imply employment, client work, or endorsements.
 

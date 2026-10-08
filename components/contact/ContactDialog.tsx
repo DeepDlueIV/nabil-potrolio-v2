@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
-import { engagements, profile } from '@/data/profile';
-import { buildMailtoHref, buildProjectBrief, type ProjectBriefInput } from '@/lib/contact/brief';
+import { engagements } from '@/data/profile';
+import { buildMailtoHref, type ProjectBriefInput } from '@/lib/contact/brief';
 
 type ContactDialogProps = {
   triggerLabel?: string;
@@ -23,7 +23,8 @@ export function ContactDialog({
   const [brief, setBrief] = useState<ProjectBriefInput>({ ...emptyBrief, service: initialService });
   const [errors, setErrors] = useState<BriefErrors>({});
   const [status, setStatus] = useState('');
-  const [preparedHref, setPreparedHref] = useState('');
+  const [sending, setSending] = useState(false);
+  const [website, setWebsite] = useState('');
   const triggerRef = useRef<HTMLButtonElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
@@ -79,21 +80,24 @@ export function ContactDialog({
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setStatus('');
-    setPreparedHref('');
-    if (!validate()) return;
-
-    if (profile.contacts.email) {
-      setPreparedHref(buildMailtoHref(profile.contacts.email, brief));
-      setStatus('Email draft prepared. Nothing was sent.');
-      return;
-    }
-
-    const text = buildProjectBrief(brief);
+    if (sending || !validate()) return;
+    setSending(true);
     try {
-      await navigator.clipboard.writeText(text);
-      setStatus('Brief copied. Nothing was sent.');
+      const response = await fetch('/api/contact', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...brief, website }),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        setStatus('Could not send. Please try again or use Write via email.');
+        return;
+      }
+      setStatus('Message sent. Thank you — Nabil will reply by email.');
+      setBrief({ ...emptyBrief, service: initialService });
     } catch {
-      setStatus('Brief prepared below. Nothing was sent.');
+      setStatus('Could not send. Please try again or use Write via email.');
+    } finally {
+      setSending(false);
     }
   }
 
@@ -114,21 +118,22 @@ export function ContactDialog({
           <section ref={dialogRef} className="contact-dialog" role="dialog" aria-modal="true" aria-labelledby="contact-dialog-title">
             <div className="contact-dialog__header">
               <div>
-                <p className="technical-label">Project brief / local-first</p>
+                <p className="technical-label">Project brief / contact</p>
                 <h2 id="contact-dialog-title">Start a conversation.</h2>
               </div>
               <button type="button" className="dialog-close" onClick={closeDialog} aria-label="Close contact form">×</button>
             </div>
-            <p className="contact-dialog__lede">Prepare a brief, or open it in your mail app addressed to nabil.rakdani@codehaus.pro. You review and send the email yourself.</p>
+            <p className="contact-dialog__lede">Send your message directly to nabil.rakdani@codehaus.pro, or use your own mail app.</p>
             <form onSubmit={handleSubmit} noValidate>
+              <input className="contact-honeypot" aria-hidden="true" tabIndex={-1} autoComplete="off" name="website" value={website} onChange={(event) => setWebsite(event.target.value)} />
               <label>
                 <span>Your name</span>
-                <input ref={nameRef} value={brief.name} onChange={(event) => update('name', event.target.value)} aria-invalid={Boolean(errors.name)} />
+                <input ref={nameRef} maxLength={120} value={brief.name} onChange={(event) => update('name', event.target.value)} aria-invalid={Boolean(errors.name)} />
                 {errors.name ? <small className="field-error">{errors.name}</small> : null}
               </label>
               <label>
                 <span>Reply email</span>
-                <input type="email" value={brief.email} onChange={(event) => update('email', event.target.value)} aria-invalid={Boolean(errors.email)} />
+                <input type="email" maxLength={254} value={brief.email} onChange={(event) => update('email', event.target.value)} aria-invalid={Boolean(errors.email)} />
                 {errors.email ? <small className="field-error">{errors.email}</small> : null}
               </label>
               <label>
@@ -140,18 +145,16 @@ export function ContactDialog({
               </label>
               <label className="contact-summary">
                 <span>Task summary</span>
-                <textarea rows={5} value={brief.summary} onChange={(event) => update('summary', event.target.value)} aria-invalid={Boolean(errors.summary)} />
+                <textarea rows={5} maxLength={5000} value={brief.summary} onChange={(event) => update('summary', event.target.value)} aria-invalid={Boolean(errors.summary)} />
                 {errors.summary ? <small className="field-error">{errors.summary}</small> : null}
               </label>
               <div className="contact-dialog__footer">
-                <p>Nothing is transmitted automatically.</p>
-                <button className="button" type="submit">Prepare brief <span aria-hidden="true">↗</span></button>
+                <p>Your details are sent only when you press Send message.</p>
+                <button className="button" type="submit" disabled={sending}>{sending ? 'Sending…' : 'Send message'} <span aria-hidden="true">↗</span></button>
                 <a className="text-link contact-email" href={buildMailtoHref('nabil.rakdani@codehaus.pro', brief)}>Write via email <span aria-hidden="true">↗</span></a>
               </div>
             </form>
             {status ? <p className="contact-status" role="status">{status}</p> : null}
-            {preparedHref ? <a className="text-link" href={preparedHref}>Open email draft</a> : null}
-            {status && !preparedHref ? <pre className="prepared-brief">{buildProjectBrief(brief)}</pre> : null}
           </section>
         </div>
       ) : null}

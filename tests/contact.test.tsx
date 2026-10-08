@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ContactDialog } from '@/components/contact/ContactDialog';
 import { buildMailtoHref, buildProjectBrief, getContactAvailabilityCopy } from '@/lib/contact/brief';
 
@@ -10,6 +10,7 @@ const validBrief = {
   service: 'architecture-audit',
   summary: 'We need to understand where our inference path is saturating.',
 };
+afterEach(() => vi.unstubAllGlobals());
 
 describe('project brief', () => {
   it('builds a portable, explicit text brief', () => {
@@ -51,30 +52,26 @@ describe('contact dialog', () => {
     render(<ContactDialog triggerLabel="Start a project brief" />);
 
     await user.click(screen.getByRole('button', { name: 'Start a project brief' }));
-    await user.click(screen.getByRole('button', { name: /prepare brief/i }));
+    await user.click(screen.getByRole('button', { name: /send message/i }));
 
     expect(screen.getByText(/enter your name/i)).toBeInTheDocument();
     expect(screen.getByText(/enter a valid reply email/i)).toBeInTheDocument();
     expect(screen.getByText(/describe the system or decision/i)).toBeInTheDocument();
   });
 
-  it('copies a brief locally when no verified recipient is configured', async () => {
+  it('confirms a message only after the server accepts it', async () => {
     const user = userEvent.setup();
-    const writeText = vi.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'clipboard', {
-      configurable: true,
-      value: { writeText },
-    });
+    vi.stubGlobal('fetch', async () => Response.json({ success: true }));
     render(<ContactDialog triggerLabel="Start a project brief" />);
 
     await user.click(screen.getByRole('button', { name: 'Start a project brief' }));
     await user.type(screen.getByLabelText(/your name/i), validBrief.name);
     await user.type(screen.getByLabelText(/reply email/i), validBrief.email);
     await user.type(screen.getByLabelText(/task summary/i), validBrief.summary);
-    await user.click(screen.getByRole('button', { name: /prepare brief/i }));
+    await user.click(screen.getByRole('button', { name: /send message/i }));
 
-    expect(screen.getByRole('status')).toHaveTextContent('Brief copied. Nothing was sent.');
-    expect(writeText).toHaveBeenCalledWith(expect.stringContaining(validBrief.summary));
+    expect(screen.getByRole('status')).toHaveTextContent('Message sent.');
+    expect(screen.getByLabelText(/task summary/i)).toHaveValue('');
   });
 
   it('traps keyboard focus inside the modal and restores it after Escape', async () => {
