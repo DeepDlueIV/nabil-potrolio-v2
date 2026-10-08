@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     return Response.json({ error: 'Check your name, email and message.' }, { status: 400 });
   }
   const key = process.env.RESEND_API_KEY;
-  if (!key) return Response.json({ error: 'Email sending is unavailable. Please use Write via email.' }, { status: 503 });
+  if (!key) return Response.json({ error: 'Email sending is unavailable. Please try again later.' }, { status: 503 });
   try {
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -39,13 +39,13 @@ export async function POST(request: Request) {
     });
     if (!response.ok) {
       console.error('Отправка контактной формы отклонена Resend:', response.status);
-      return Response.json({ error: 'Could not send. Please try again or use Write via email.' }, { status: 502 });
+      return Response.json({ error: 'Could not send. Please try again later.' }, { status: 502 });
     }
     const result = await response.json();
-    if (!result.id) return Response.json({ error: 'Could not confirm sending. Please use Write via email.' }, { status: 502 });
+    if (!result.id) return Response.json({ error: 'Could not confirm sending. Please try again later.' }, { status: 502 });
     return Response.json({ success: true });
   } catch {
     console.error('Ошибка подключения к Resend при отправке контактной формы.');
-    return Response.json({ error: 'Could not send. Please try again or use Write via email.' }, { status: 502 });
+    return Response.json({ error: 'Could not send. Please try again later.' }, { status: 502 });
   }
 }

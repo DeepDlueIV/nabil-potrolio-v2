@@ -127,7 +127,6 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .contact-summary, .contact-dialog__footer { grid-column: 1 / -1; }
 .field-error { color: var(--amber); font-family: var(--font-manrope), sans-serif; font-size: .68rem; text-transform: none; letter-spacing: normal; }
 .contact-dialog__footer { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1.5rem; }
-.contact-email { white-space: nowrap; gap: .7rem; }
 .contact-honeypot { display: none; }
 .contact-dialog__footer .button:disabled { opacity: .6; cursor: wait; }
 .contact-dialog__footer p { width: 100%; margin: 0; color: #6f7e8a; font-size: .65rem; }

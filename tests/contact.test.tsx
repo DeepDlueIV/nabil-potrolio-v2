@@ -37,15 +37,12 @@ describe('project brief', () => {
 });
 
 describe('contact dialog', () => {
-  it('offers a temporary email draft with the entered brief', async () => {
+  it('offers one send button without the temporary email link', async () => {
     const user = userEvent.setup();
     render(<ContactDialog />);
     await user.click(screen.getByRole('button', { name: /start a project brief/i }));
-    await user.type(screen.getByLabelText(/your name/i), validBrief.name);
-    await user.type(screen.getByLabelText(/task summary/i), validBrief.summary);
-    const href = screen.getByRole('link', { name: /write via email/i }).getAttribute('href')!;
-    expect(href).toMatch(/^mailto:nabil\.rakdani@codehaus\.pro\?/);
-    expect(decodeURIComponent(href)).toContain(validBrief.summary);
+    expect(screen.queryByRole('link', { name: /write via email/i })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /send message/i })).toBeInTheDocument();
   });
   it('shows validation errors before preparing a brief', async () => {
     const user = userEvent.setup();
@@ -83,7 +80,7 @@ describe('contact dialog', () => {
     const close = screen.getByRole('button', { name: 'Close contact form' });
     close.focus();
     await user.tab({ shift: true });
-    expect(screen.getByRole('link', { name: /write via email/i })).toHaveFocus();
+    expect(screen.getByRole('button', { name: /send message/i })).toHaveFocus();
     await user.tab();
     expect(close).toHaveFocus();
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { engagements } from '@/data/profile';
-import { buildMailtoHref, type ProjectBriefInput } from '@/lib/contact/brief';
+import { type ProjectBriefInput } from '@/lib/contact/brief';
 
 type ContactDialogProps = {
   triggerLabel?: string;
@@ -89,13 +89,13 @@ export function ContactDialog({
       });
       const result = await response.json();
       if (!response.ok || !result.success) {
-        setStatus('Could not send. Please try again or use Write via email.');
+        setStatus('Could not send. Please try again or email nabil.rakdani@codehaus.pro.');
         return;
       }
       setStatus('Message sent. Thank you — Nabil will reply by email.');
       setBrief({ ...emptyBrief, service: initialService });
     } catch {
-      setStatus('Could not send. Please try again or use Write via email.');
+      setStatus('Could not send. Please try again or email nabil.rakdani@codehaus.pro.');
     } finally {
       setSending(false);
     }
@@ -123,7 +123,7 @@ export function ContactDialog({
               </div>
               <button type="button" className="dialog-close" onClick={closeDialog} aria-label="Close contact form">×</button>
             </div>
-            <p className="contact-dialog__lede">Send your message directly to nabil.rakdani@codehaus.pro, or use your own mail app.</p>
+            <p className="contact-dialog__lede">Send your message directly to nabil.rakdani@codehaus.pro.</p>
             <form onSubmit={handleSubmit} noValidate>
               <input className="contact-honeypot" aria-hidden="true" tabIndex={-1} autoComplete="off" name="website" value={website} onChange={(event) => setWebsite(event.target.value)} />
               <label>
@@ -151,7 +151,6 @@ export function ContactDialog({
               <div className="contact-dialog__footer">
                 <p>Your details are sent only when you press Send message.</p>
                 <button className="button" type="submit" disabled={sending}>{sending ? 'Sending…' : 'Send message'} <span aria-hidden="true">↗</span></button>
-                <a className="text-link contact-email" href={buildMailtoHref('nabil.rakdani@codehaus.pro', brief)}>Write via email <span aria-hidden="true">↗</span></a>
               </div>
             </form>
             {status ? <p className="contact-status" role="status">{status}</p> : null}
