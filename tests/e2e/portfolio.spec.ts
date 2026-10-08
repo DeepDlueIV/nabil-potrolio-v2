@@ -51,7 +51,7 @@ test('manual holds and contact workflow', async ({ page, context }) => {
   await expect(architecture.getByRole('heading', { name: 'Authenticated request' })).toBeVisible();
   await architecture.getByRole('button', { name: 'Resume architecture presentation' }).click();
   await expect(architecture.getByRole('heading', { name: 'Policy and inference' })).toBeVisible({ timeout: 4500 });
-  await page.getByRole('button', { name: 'Show experience frame 4' }).click();
+  await page.getByRole('button', { name: 'Show experience frame 1' }).click();
   await expect(page.locator('.experience-showcase')).toHaveAttribute('data-requested', '3');
   await expect(page.locator('.experience-showcase')).toHaveAttribute('data-frame', '3', { timeout: 8000 });
   await expect(page.locator('.experience-showcase h3')).toHaveText('Full-Stack Systems Engineer');

@@ -7,7 +7,7 @@ describe('verified portfolio content', () => {
   it('keeps the user-approved seven-year career span', () => {
     expect(profile.years).toBe(7);
     expect(profile.experience.map((role) => role.dates)).toEqual([
-      '2021 — Present',
+      '2024 — Present',
       '2021 — 2024',
       '2020 — 2021',
       '2019 — 2020',

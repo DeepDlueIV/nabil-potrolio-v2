@@ -13,12 +13,12 @@ test('experience navigation remains with the decoded visible frame', async ({ pa
   const showcase = page.locator('.experience-showcase');
   await showcase.scrollIntoViewIfNeeded();
   await expect(showcase).toHaveAttribute('data-ready', 'true');
-  await page.getByRole('button', { name: 'Show experience frame 2' }).click();
+  await page.getByRole('button', { name: 'Show experience frame 3' }).click();
   await expect(showcase).toHaveAttribute('data-requested', '1');
-  await expect(page.getByRole('button', { name: 'Show experience frame 1' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: 'Show experience frame 4' })).toHaveAttribute('aria-pressed', 'true');
   releaseImage();
   await expect(showcase).toHaveAttribute('data-frame', '1');
-  await expect(page.getByRole('button', { name: 'Show experience frame 2' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('button', { name: 'Show experience frame 3' })).toHaveAttribute('aria-pressed', 'true');
 });
 
 test('experience buttons keep their position through every role and resume', async ({ page }) => {
@@ -28,11 +28,11 @@ test('experience buttons keep their position through every role and resume', asy
   const showcase = page.locator('.experience-showcase');
   await showcase.scrollIntoViewIfNeeded();
   await expect(showcase).toHaveAttribute('data-ready', 'true');
-  const first = page.getByRole('button', { name: 'Show experience frame 1' });
+  const first = page.getByRole('button', { name: 'Show experience frame 4' });
   await first.click();
   const anchor = await first.boundingBox();
   for (let index = 1; index < 4; index += 1) {
-    await page.getByRole('button', { name: `Show experience frame ${index + 1}` }).click();
+    await page.getByRole('button', { name: `Show experience frame ${4 - index}` }).click();
     await expect(showcase).toHaveAttribute('data-frame', String(index));
     const position = await first.boundingBox();
     expect(Math.abs(position!.y - anchor!.y)).toBeLessThanOrEqual(2);
@@ -51,7 +51,7 @@ test('experience shows all four decoded roles and repeats without a control clic
   await page.mouse.move(0, 0);
   for (const index of [0, 1, 2, 3, 0]) {
     await expect(showcase).toHaveAttribute('data-frame', String(index), { timeout: 12000 });
-    await expect(page.getByRole('button', { name: `Show experience frame ${index + 1}` })).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByRole('button', { name: `Show experience frame ${4 - index}` })).toHaveAttribute('aria-pressed', 'true');
     await expect(showcase.locator('.experience-photo--current')).toBeVisible();
     expect(await showcase.locator('.experience-photo--current').evaluate((node) => (node as HTMLImageElement).complete && (node as HTMLImageElement).naturalWidth > 0)).toBe(true);
   }

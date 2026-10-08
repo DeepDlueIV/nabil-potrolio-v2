@@ -12,7 +12,7 @@ export function Experience() {
     <ExperienceShowcase />
     <section className="career-chronology" aria-label="Career chronology">
       {profile.experience.map((role, index) => <article key={role.id}>
-        <div className="career-period"><span className="technical-label">0{index + 1}</span><p>{role.dates}</p></div>
+        <div className="career-period"><span className="technical-label">0{profile.experience.length - index}</span><p>{role.dates}</p></div>
         <div className="career-role"><h3>{role.title}</h3><p>{role.organization}</p><small>{role.technologies.join(' · ')}</small></div>
         <div className="career-evidence"><p>{role.description}</p><ul>{role.responsibilities.map((item) => <li key={item}>{item}</li>)}</ul></div>
       </article>)}

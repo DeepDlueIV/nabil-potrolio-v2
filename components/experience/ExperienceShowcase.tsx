@@ -106,7 +106,7 @@ export function ExperienceShowcase() {
       <p className="experience-photo-caption">Editorial infrastructure imagery</p>
     </div>
     <div className="experience-frame-copy">
-      <p className="technical-label">0{frame.index + 1} / 04 · {role.dates}</p>
+      <p className="technical-label">0{profile.experience.length - frame.index} / 04 · {role.dates}</p>
       {/* Скрытые варианты резервируют высоту по реальному переносу текста, включая мобильный экран. */}
       <div className="experience-title-slot">
         {profile.experience.map((candidate) => <span className="experience-title-measure" aria-hidden="true" key={candidate.id}>{candidate.title}</span>)}
@@ -118,8 +118,8 @@ export function ExperienceShowcase() {
       </div>
       <div className="experience-frame-navigation" aria-label="Experience frames">
         {profile.experience.map((candidate, index) => <button key={candidate.id} ref={(node) => { buttons.current[index] = node; }}
-          type="button" aria-label={`Show experience frame ${index + 1}`} aria-pressed={frame.index === index}
-          onClick={() => select(index)} onKeyDown={(event) => key(event, index)}>{String(index + 1).padStart(2, '0')}</button>)}
+          type="button" aria-label={`Show experience frame ${profile.experience.length - index}`} aria-pressed={frame.index === index}
+          onClick={() => select(index)} onKeyDown={(event) => key(event, index)}>{String(profile.experience.length - index).padStart(2, '0')}</button>)}
         {!reduced ? <button className="experience-playback" data-presentation-playback type="button" aria-label={held ? 'Resume experience presentation' : 'Pause experience presentation'}
           onClick={() => { if (held) resume(); else select(frame.index); }}><span aria-hidden="true">{held ? '▶' : 'Ⅱ'}</span></button> : null}
       </div>

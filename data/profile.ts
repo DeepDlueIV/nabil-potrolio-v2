@@ -27,7 +27,7 @@ export const profile: {
   languages: ['Italian / Native', 'English / Fluent', 'French / Professional'],
   experience: [
     {
-      id: 'principal', dates: '2021 — Present', title: 'Independent Principal Architect & Fractional CTO', organization: 'Independent Contractor / Consultant', domain: 'Private AI platforms & technical leadership',
+      id: 'principal', dates: '2024 — Present', title: 'Independent Principal Architect & Fractional CTO', organization: 'Independent Contractor / Consultant', domain: 'Private AI platforms & technical leadership',
       description: 'Architectural direction and AI infrastructure consulting for high-tech enterprises and growth-stage companies.',
       responsibilities: ['Design greenfield private AI platforms', 'Shape distributed compute clusters', 'Guide high-throughput service architecture'],
       technologies: ['Kubernetes', 'CUDA', 'vLLM', 'Terraform'], image: '/images/experience-datacenter.webp', imageAlt: 'AI-generated editorial photograph of server infrastructure; not a client site', imagePosition: '50% 48%',
