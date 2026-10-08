@@ -24,7 +24,7 @@ describe('open professional content', () => {
     expect(within(record).getAllByRole('heading', { level: 3 })).toHaveLength(4);
     expect(record.closest('details')).toBeNull();
     const rows = within(record).getAllByRole('article');
-    expect(rows[0].querySelector('.career-period')).toHaveTextContent('042024 — Present');
+    expect(rows[0].querySelector('.career-period')).toHaveTextContent('042024 — 2025');
     expect(rows[3].querySelector('.career-period')).toHaveTextContent('012019 — 2020');
     expect(screen.getByRole('button', { name: 'Show experience frame 4' })).toHaveAttribute('aria-pressed', 'true');
   });
