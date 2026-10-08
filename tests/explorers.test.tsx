@@ -45,7 +45,7 @@ describe('open professional content', () => {
 
   it('introduces Nabil with the supplied portrait and verified languages', () => {
     render(<About />);
-    expect(screen.getByRole('img', { name: 'Nabil Rakdani beside a GPU rig' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Nabil Rakdani in a black jacket with crossed arms' })).toBeInTheDocument();
     expect(screen.getByText(/My seven years of experience/i)).toBeInTheDocument();
     expect(screen.getByText(/Italian — Native/)).toBeInTheDocument();
   });

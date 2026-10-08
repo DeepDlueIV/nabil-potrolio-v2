@@ -20,7 +20,7 @@ export const profile: {
   location: 'Pavia, Italy',
   availability: 'Global B2B engagements',
   years: 7,
-  portrait: { src: '/images/nabil-portrait.webp', alt: 'Nabil Rakdani beside a GPU rig', objectPosition: '50% 38%' },
+  portrait: { src: '/images/nabil-professional-portrait.webp', alt: 'Nabil Rakdani in a black jacket with crossed arms', objectPosition: '50% 20%' },
   description: 'Designing, scaling, and securing enterprise-grade AI infrastructure, distributed GPU clusters, and high-throughput systems.',
   // Keep empty until genuine contact details are supplied. Never link to fabricated profiles.
   contacts: { email: '', github: '', linkedin: '' },
