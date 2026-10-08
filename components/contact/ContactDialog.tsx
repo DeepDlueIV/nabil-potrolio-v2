@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { engagements, profile } from '@/data/profile';
-import { buildMailtoHref, buildProjectBrief, getContactAvailabilityCopy, type ProjectBriefInput } from '@/lib/contact/brief';
+import { buildMailtoHref, buildProjectBrief, type ProjectBriefInput } from '@/lib/contact/brief';
 
 type ContactDialogProps = {
   triggerLabel?: string;
@@ -27,7 +27,6 @@ export function ContactDialog({
   const triggerRef = useRef<HTMLButtonElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);
   const dialogRef = useRef<HTMLElement>(null);
-  const contactCopy = getContactAvailabilityCopy(profile.contacts.email);
 
   useEffect(() => {
     if (!open) return;
@@ -120,7 +119,7 @@ export function ContactDialog({
               </div>
               <button type="button" className="dialog-close" onClick={closeDialog} aria-label="Close contact form">×</button>
             </div>
-            <p className="contact-dialog__lede">{contactCopy.dialog}</p>
+            <p className="contact-dialog__lede">Prepare a brief, or open it in your mail app addressed to nabil.rakdani@codehaus.pro. You review and send the email yourself.</p>
             <form onSubmit={handleSubmit} noValidate>
               <label>
                 <span>Your name</span>
@@ -147,6 +146,7 @@ export function ContactDialog({
               <div className="contact-dialog__footer">
                 <p>Nothing is transmitted automatically.</p>
                 <button className="button" type="submit">Prepare brief <span aria-hidden="true">↗</span></button>
+                <a className="text-link contact-email" href={buildMailtoHref('nabil.rakdani@codehaus.pro', brief)}>Write via email <span aria-hidden="true">↗</span></a>
               </div>
             </form>
             {status ? <p className="contact-status" role="status">{status}</p> : null}
